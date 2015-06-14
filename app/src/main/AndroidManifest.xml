@@ -2,13 +2,25 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.pr.carjoin" >
 
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+    <uses-permission android:name="android.permission.USE_CREDENTIALS" />
+    <uses-permission android:name="com.example.gcm.permission.C2D_MESSAGE" />
+    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
+
+    <permission
+        android:name="com.example.gcm.permission.C2D_MESSAGE"
+        android:protectionLevel="signature" />
+
     <application
-        android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
-        android:label="@string/app_name"
-        android:theme="@style/AppTheme" >
+    android:allowBackup="true"
+    android:icon="@mipmap/ic_launcher"
+    android:label="@string/app_name"
+    android:theme="@style/AppTheme" >
+        <meta-data android:name="com.google.android.gms.version" android:value="@integer/google_play_services_version" />
+
         <activity
-            android:name="com.pr.carjoin.MainActivity"
+            android:name=".activities.LoginActivity"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -16,6 +28,34 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".activities.MainActivity"
+            android:label="@string/app_name" >
+        </activity>
+
+        <receiver android:name="com.google.android.gms.gcm.GcmReceiver"
+            android:exported="true"
+            android:permission="com.google.android.c2dm.permission.SEND" >
+            <intent-filter>
+                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+                <category android:name="com.example.gcm" />
+            </intent-filter>
+        </receiver>
+        <service android:name=".chat.MSGService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.android.gms.iid.InstanceID"/>
+                <action android:name="com.google.android.c2dm.intent.REGISTRATION" />
+            </intent-filter>
+        </service>
+        <activity
+            android:name=".chat.ChatMainActivity"
+            android:label="@string/app_name" >
+        </activity>
+        <activity
+            android:name=".chat.ChatActivity"
+            android:launchMode="singleTask"
+            android:label="@string/app_name" />
     </application>
 
 </manifest>
