@@ -27,7 +27,6 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.pr.carjoin.R;
 import com.pr.carjoin.Util;
-import com.pr.carjoin.chat.ChatMainActivity;
 
 /**
  * Created by rohit on 14/6/15.
@@ -166,9 +165,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                             Log.w(Util.TAG, "signInWithCredential", task.getException());
                             Toast.makeText(LoginActivity.this, " Authentication failed for firebase.",
                                     Toast.LENGTH_SHORT).show();
-                        } else {
-                            startActivity(new Intent(LoginActivity.this, ChatMainActivity.class));
-                            finish();
                         }
                         // [START_EXCLUDE]
                         hideProgressDialog();
@@ -193,9 +189,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             Log.d(Util.TAG, LOG_LABEL + "onAuthStateChanged:signed_in:" + user.getUid());
             Intent intent = new Intent(LoginActivity.this, MainActivity.class);
             startActivity(intent);
-        } else {
-            // User is signed out
-            Log.d(Util.TAG, LOG_LABEL + "onAuthStateChanged:signed_out");
+            finish();
         }
     }
 

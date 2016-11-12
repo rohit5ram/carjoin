@@ -23,4 +23,11 @@
     <string name="cause_crash">Cause Crash</string>
     <string name="banner_ad_unit_id" translatable="false">ca-app-pub-3940256099942544/6300978111</string>
     <string name="string_signing_in">Signing In</string>
+    <string name="google_maps_key">AIzaSyAN2uGvv7g9Ihw5elQwqm-KQoZi-ajWGHc</string>
+    <string name="title_activity_main">MainActivity</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="android_studio">Android Studio</string>
+    <string name="android_studio_android_com">android.studio@android.com</string>
 </resources>
