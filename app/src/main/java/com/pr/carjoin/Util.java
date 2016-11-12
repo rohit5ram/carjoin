@@ -13,4 +13,8 @@ public class Util {
             Log.e(TAG, logLabel + " :: " + el.toString());
         }
     }
+
+    public static boolean isUserAlreadySignedIn(){
+        return true;
+    }
 }

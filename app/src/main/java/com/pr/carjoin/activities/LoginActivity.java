@@ -3,10 +3,10 @@ package com.pr.carjoin.activities;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v4.app.FragmentActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
-import android.widget.ProgressBar;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.google.android.gms.auth.api.Auth;
@@ -31,7 +31,7 @@ import com.pr.carjoin.Util;
 /**
  * Created by rohit on 14/6/15.
  */
-public class LoginActivity extends FragmentActivity implements View.OnClickListener,
+public class LoginActivity extends AppCompatActivity implements View.OnClickListener,
         GoogleApiClient.OnConnectionFailedListener, FirebaseAuth.AuthStateListener {
     private static final String LOG_LABEL = "activities.LoginActivity";
 
@@ -43,7 +43,7 @@ public class LoginActivity extends FragmentActivity implements View.OnClickListe
     /**
      * True if we are in the process of resolving a ConnectionResult
      */
-    private ProgressBar progressBar;
+    private LinearLayout progressBarLayout;
     private FirebaseAuth mAuth;
     private GoogleApiClient mGoogleApiClient;
 
@@ -56,7 +56,7 @@ public class LoginActivity extends FragmentActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        progressBar = (ProgressBar) findViewById(R.id.login_progress_bar);
+        progressBarLayout = (LinearLayout) findViewById(R.id.signing_in_progress_layout);
 
         // Configure sign-in to request the user's ID, email address, and basic
         // profile. ID and basic profile are included in DEFAULT_SIGN_IN.
@@ -174,11 +174,11 @@ public class LoginActivity extends FragmentActivity implements View.OnClickListe
     }
 
     private void hideProgressDialog() {
-        progressBar.setVisibility(View.GONE);
+        progressBarLayout.setVisibility(View.GONE);
     }
 
     private void showProgressDialog() {
-        progressBar.setVisibility(View.VISIBLE);
+        progressBarLayout.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -187,9 +187,15 @@ public class LoginActivity extends FragmentActivity implements View.OnClickListe
         if (user != null) {
             // User is signed in
             Log.d(Util.TAG, LOG_LABEL + "onAuthStateChanged:signed_in:" + user.getUid());
+            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+            startActivity(intent);
         } else {
             // User is signed out
             Log.d(Util.TAG, LOG_LABEL + "onAuthStateChanged:signed_out");
         }
+    }
+
+    private void saveUserDetailsInDB(FirebaseUser firebaseUser){
+
     }
 }
