@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.pr.carjoin" >
+    package="com.pr.carjoin">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
@@ -9,20 +9,20 @@
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
-<!--    <permission
-        android:name="com.example.gcm.permission.C2D_MESSAGE"
-        android:protectionLevel="signature" />-->
+    <!--    <permission
+            android:name="com.example.gcm.permission.C2D_MESSAGE"
+            android:protectionLevel="signature" />-->
 
     <application
-    android:allowBackup="true"
-    android:icon="@mipmap/ic_launcher"
-    android:label="@string/app_name"
-    android:theme="@style/AppTheme" >
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme">
         <!--<meta-data android:name="com.google.android.gms.version" android:value="@integer/google_play_services_version" />-->
 
         <activity
             android:name=".activities.LoginActivity"
-            android:label="@string/app_name" >
+            android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -31,16 +31,9 @@
         </activity>
         <activity
             android:name=".activities.MainActivity"
-            android:label="@string/app_name" >
-        </activity>
+            android:label="@string/app_name" />
 
-        <activity android:name=".chat.SignInActivity">
-        <!--<intent-filter>-->
-            <!--<action android:name="android.intent.action.MAIN" />-->
-
-            <!--<category android:name="android.intent.category.LAUNCHER" />-->
-        <!--</intent-filter>-->
-        </activity>
+        <activity android:name=".chat.SignInActivity" />
 
         <service
             android:name=".chat.MyFirebaseMessagingService"
