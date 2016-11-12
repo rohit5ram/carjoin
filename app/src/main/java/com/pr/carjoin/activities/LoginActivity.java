@@ -46,15 +46,13 @@ public class LoginActivity extends FragmentActivity implements View.OnClickListe
     private GoogleApiClient mGoogleApiClient;
 
     /* Request code used to invoke sign in user interactions. */
-    private static final int RC_SIGN_IN = 0;
+    private static final int RC_SIGN_IN = 9001;
 
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-
-        mAuth = FirebaseAuth.getInstance();
 
         progressBar = (ProgressBar) findViewById(R.id.login_progress_bar);
 
@@ -71,6 +69,8 @@ public class LoginActivity extends FragmentActivity implements View.OnClickListe
                 .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
                 .build();
 
+
+        mAuth = FirebaseAuth.getInstance();
 
         // Customize sign-in button. The sign-in button can be displayed in
         // multiple sizes and color schemes. It can also be contextually
