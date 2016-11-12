@@ -11,10 +11,24 @@ android {
         versionCode 1
         versionName "1.0"
     }
+    signingConfigs {
+        debug {
+            storeFile file("debug.keystore")
+        }
+        release {
+            storeFile file(System.getenv("KEYSTORE_CJ"))
+            storePassword System.getenv("KEYSTORE_PASSWORD_CJ")
+            keyAlias System.getenv("KEY_ALIAS_CJ")
+            keyPassword System.getenv("KEY_PASSWORD_CJ")
+        }
+    }
     buildTypes {
         release {
+            shrinkResources true
             minifyEnabled true
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
+            zipAlignEnabled true
         }
     }
 }
@@ -23,7 +37,7 @@ dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'com.android.support:appcompat-v7:25.0.0'
     compile 'com.google.firebase:firebase-core:9.8.0'
-    compile 'com.squareup.okhttp:okhttp:2.4.0'
+    compile 'com.squareup.okhttp3:okhttp:3.4.2'
     compile 'com.google.firebase:firebase-database:9.8.0'
     compile 'com.google.android.gms:play-services-auth:9.8.0'
     compile 'com.google.firebase:firebase-auth:9.8.0'
