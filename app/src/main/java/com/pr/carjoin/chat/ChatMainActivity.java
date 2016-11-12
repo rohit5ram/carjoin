@@ -41,12 +41,16 @@ import com.bumptech.glide.Glide;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
+import com.google.android.gms.appinvite.AppInvite;
 import com.google.android.gms.appinvite.AppInviteInvitation;
+import com.google.android.gms.appinvite.AppInviteInvitationResult;
+import com.google.android.gms.appinvite.AppInviteReferral;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -55,6 +59,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
+import com.pr.carjoin.BuildConfig;
 import com.pr.carjoin.R;
 import com.pr.carjoin.activities.LoginActivity;
 
@@ -128,6 +133,7 @@ public class ChatMainActivity extends AppCompatActivity implements
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .enableAutoManage(this /* FragmentActivity */, this /* OnConnectionFailedListener */)
                 .addApi(Auth.GOOGLE_SIGN_IN_API)
+                .addApi(AppInvite.API)
                 .build();
 
         mProgressBar = (ProgressBar) findViewById(R.id.progressBar);
@@ -137,10 +143,10 @@ public class ChatMainActivity extends AppCompatActivity implements
 
         mFirebaseDatabaseReference = FirebaseDatabase.getInstance().getReference();
         mFirebaseAdapter = new FirebaseRecyclerAdapter<FriendlyMessage, MessageViewHolder>(
-                        FriendlyMessage.class,
-                        R.layout.item_message,
-                        MessageViewHolder.class,
-                        mFirebaseDatabaseReference.child(MESSAGES_CHILD)) {
+                FriendlyMessage.class,
+                R.layout.item_message,
+                MessageViewHolder.class,
+                mFirebaseDatabaseReference.child(MESSAGES_CHILD)) {
 
             @Override
             protected void populateViewHolder(MessageViewHolder viewHolder, FriendlyMessage friendlyMessage, int position) {
@@ -190,8 +196,8 @@ public class ChatMainActivity extends AppCompatActivity implements
         // Define Firebase Remote Config Settings.
         FirebaseRemoteConfigSettings firebaseRemoteConfigSettings =
                 new FirebaseRemoteConfigSettings.Builder()
-                .setDeveloperModeEnabled(true)
-                .build();
+                        .setDeveloperModeEnabled(BuildConfig.DEBUG)
+                        .build();
 
         // Define default config values. Defaults are used when fetched config values are not
         // available. Eg: if an error occurred fetching values from the server.
@@ -318,20 +324,17 @@ public class ChatMainActivity extends AppCompatActivity implements
             cacheExpiration = 0;
         }
         mFirebaseRemoteConfig.fetch(cacheExpiration)
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                .addOnCompleteListener(this, new OnCompleteListener<Void>() {
                     @Override
-                    public void onSuccess(Void aVoid) {
-                        // Make the fetched config available via FirebaseRemoteConfig get<type> calls.
-                        mFirebaseRemoteConfig.activateFetched();
-                        applyRetrievedLengthLimit();
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        // There has been an error fetching the config
-                        Log.w(TAG, "Error fetching config: " + e.getMessage());
-                        applyRetrievedLengthLimit();
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if (task.isSuccessful()) {
+                            Log.d(TAG, "Fetch Succeeded");
+                            mFirebaseRemoteConfig.activateFetched();
+                            applyRetrievedLengthLimit();
+                        } else {
+                            // There has been an error fetching the config
+                            Log.w(TAG, "Error fetching config: " + task.getResult());
+                        }
                     }
                 });
     }
@@ -350,6 +353,7 @@ public class ChatMainActivity extends AppCompatActivity implements
                 // Check how many invitations were sent and log.
                 String[] ids = AppInviteInvitation.getInvitationIds(resultCode, data);
                 Log.d(TAG, "Invitations sent: " + ids.length);
+                getInvite();
             } else {
                 // Use Firebase Measurement to log that invitation was not sent
                 Bundle payload = new Bundle();
@@ -375,6 +379,32 @@ public class ChatMainActivity extends AppCompatActivity implements
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
         Log.d(TAG, "onConnectionFailed:" + connectionResult);
+    }
+
+    public void getInvite() {
+        // Check for App Invite invitations and launch deep-link activity if possible.
+        // Requires that an Activity is registered in AndroidManifest.xml to handle
+        // deep-link URLs.
+        boolean autoLaunchDeepLink = true;
+        AppInvite.AppInviteApi.getInvitation(mGoogleApiClient, this, autoLaunchDeepLink)
+                .setResultCallback(
+                        new ResultCallback<AppInviteInvitationResult>() {
+                            @Override
+                            public void onResult(@NonNull AppInviteInvitationResult result) {
+                                Log.d(TAG, "getInvitation:onResult:" + result.getStatus());
+                                if (result.getStatus().isSuccess()) {
+                                    // Extract information from the intent
+                                    Intent intent = result.getInvitationIntent();
+                                    String deepLink = AppInviteReferral.getDeepLink(intent);
+                                    String invitationId = AppInviteReferral.getInvitationId(intent);
+
+                                    // Because autoLaunchDeepLink = true we don't have to do anything
+                                    // here, but we could set that to false and manually choose
+                                    // an Activity to launch to handle the deep link here.
+                                    // ...
+                                }
+                            }
+                        });
     }
 
 }
