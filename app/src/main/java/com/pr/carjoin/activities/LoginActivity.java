@@ -14,8 +14,10 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.Scopes;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
@@ -59,6 +61,9 @@ public class LoginActivity extends FragmentActivity implements View.OnClickListe
         // Configure sign-in to request the user's ID, email address, and basic
         // profile. ID and basic profile are included in DEFAULT_SIGN_IN.
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(getString(R.string.default_web_client_id))
+                .requestScopes(new Scope(Scopes.PLUS_LOGIN))
+                .requestScopes(new Scope(Scopes.PLUS_ME))
                 .requestEmail()
                 .build();
 
@@ -128,7 +133,7 @@ public class LoginActivity extends FragmentActivity implements View.OnClickListe
     }
 
     private void handleSignInResult(GoogleSignInResult result) {
-        Log.d(Util.TAG, LOG_LABEL + "handleSignInResult:" + result.isSuccess());
+        Log.d(Util.TAG, LOG_LABEL + " handleSignInResult: " + result.isSuccess());
         if (result.isSuccess()) {
             // Signed in successfully, show authenticated UI.
             GoogleSignInAccount acct = result.getSignInAccount();
@@ -158,7 +163,7 @@ public class LoginActivity extends FragmentActivity implements View.OnClickListe
                         // signed in user can be handled in the listener.
                         if (!task.isSuccessful()) {
                             Log.w(Util.TAG, "signInWithCredential", task.getException());
-                            Toast.makeText(LoginActivity.this, "Authentication failed.",
+                            Toast.makeText(LoginActivity.this, " Authentication failed for firebase.",
                                     Toast.LENGTH_SHORT).show();
                         }
                         // [START_EXCLUDE]
