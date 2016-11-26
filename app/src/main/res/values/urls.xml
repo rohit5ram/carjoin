@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="device_geo_location_url">https://www.googleapis.com/geolocation/v1/geolocate?key=%1$s</string>
+</resources>

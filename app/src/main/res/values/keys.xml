@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="directions_api_key">AIzaSyCtXiQp7wYyXlGyRUwpzk3CgwF3JS9W1KE</string>
+    <string name="google_geo_api_key">AIzaSyAFo34b80HMhX6jOBHTs02A8-H-uq7HkEE</string>
+    <string name="google_places_api_key">AIzaSyAebdzOLnD_Wm1ntQZovi1KX5IoIuLjdkM</string>
+    <string name="google_maps_key">AIzaSyAN2uGvv7g9Ihw5elQwqm-KQoZi-ajWGHc</string>
+</resources>
