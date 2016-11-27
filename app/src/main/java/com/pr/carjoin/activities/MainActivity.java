@@ -28,11 +28,15 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
+import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.Places;
+import com.google.android.gms.location.places.ui.PlacePicker;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -65,7 +69,17 @@ public class MainActivity extends AppCompatActivity
     private Geocoder geocoder;
     private Marker pickUpLocationMarker;
     private TextView pickLocationAddressView, pickLocationHeading, destinationAddressView;
-    private LinearLayout pickUpLocationLayout, destinationLayout;
+    private LinearLayout destinationLayout;
+    private View.OnClickListener clickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            if (view.getId() == R.id.location_pick_up_address_layout) {
+                launchPlacePicker(PICK_UP_PLACE_PICKER_REQUEST_CODE);
+            } else if (view.getId() == R.id.location_destination_address_layout) {
+                launchPlacePicker(DESTINATION_PLACE_PICKER_REQUEST_CODE);
+            }
+        }
+    };
 
     /**
      * Request code for location permission request.
@@ -79,6 +93,8 @@ public class MainActivity extends AppCompatActivity
      * {@link #onRequestPermissionsResult(int, String[], int[])}.
      */
     private boolean mPermissionDenied = false;
+    private static final int PICK_UP_PLACE_PICKER_REQUEST_CODE = 1;
+    private static final int DESTINATION_PLACE_PICKER_REQUEST_CODE = 2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,8 +107,10 @@ public class MainActivity extends AppCompatActivity
 
         setContentView(R.layout.activity_main);
         pickLocationHeading = (TextView) findViewById(R.id.location_pick_up_heading);
-        pickUpLocationLayout = (LinearLayout) findViewById(R.id.location_pick_up_address_layout);
+        LinearLayout pickUpLocationLayout = (LinearLayout) findViewById(R.id.location_pick_up_address_layout);
+        pickUpLocationLayout.setOnClickListener(clickListener);
         destinationLayout = (LinearLayout) findViewById(R.id.location_destination_address_layout);
+        destinationLayout.setOnClickListener(clickListener);
         destinationAddressView = (TextView) findViewById(R.id.location_destination_address);
         FloatingActionButton myLocationFab = (FloatingActionButton) findViewById(R.id.my_location_fab);
         myLocationFab.setOnClickListener(new View.OnClickListener() {
@@ -358,5 +376,37 @@ public class MainActivity extends AppCompatActivity
     private void showDestinationLayout() {
         pickLocationHeading.setVisibility(View.GONE);
         destinationLayout.setVisibility(View.VISIBLE);
+    }
+
+    private void launchPlacePicker(int requestCode) {
+        PlacePicker.IntentBuilder builder = new PlacePicker.IntentBuilder();
+        try {
+            startActivityForResult(builder.build(this), requestCode);
+        } catch (GooglePlayServicesRepairableException | GooglePlayServicesNotAvailableException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == RESULT_OK) {
+            Place selectedPlace = PlacePicker.getPlace(this, data);
+            try {
+                List<Address> addresses = geocoder.getFromLocation(selectedPlace.getLatLng().latitude,
+                        selectedPlace.getLatLng().longitude, 1);
+                switch (requestCode) {
+                    case PICK_UP_PLACE_PICKER_REQUEST_CODE:
+                        pickLocationAddressView.setText(Util.getAddressAsString(addresses.get(0)));
+                        showDestinationLayout();
+                        break;
+                    case DESTINATION_PLACE_PICKER_REQUEST_CODE:
+                        destinationAddressView.setText(Util.getAddressAsString(addresses.get(0)));
+                        break;
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }
