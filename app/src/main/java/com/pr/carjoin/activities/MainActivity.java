@@ -3,6 +3,8 @@ package com.pr.carjoin.activities;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -44,6 +46,10 @@ import com.pr.carjoin.R;
 import com.pr.carjoin.Util;
 import com.pr.carjoin.chat.ChatMainActivity;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.Locale;
+
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback,
         GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks, LocationListener {
@@ -54,7 +60,9 @@ public class MainActivity extends AppCompatActivity
     private LocationRequest locationRequest;
     private GoogleApiClient mGoogleApiClient;
     private Location location;
+    private Geocoder geocoder;
     private Marker pickUpLocationMarker;
+    private TextView pickLocationAddressView;
 
     /**
      * Request code for location permission request.
@@ -91,6 +99,8 @@ public class MainActivity extends AppCompatActivity
                 }
             }
         });
+        pickLocationAddressView = (TextView) findViewById(R.id.location_pick_up_address);
+        geocoder = new Geocoder(this, Locale.getDefault());
         startTripFab = (FloatingActionButton) findViewById(R.id.start_trip);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -173,6 +183,21 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onCameraMove() {
                 pickUpLocationMarker.setPosition(mMap.getCameraPosition().target);
+            }
+        });
+        mMap.setOnCameraIdleListener(new GoogleMap.OnCameraIdleListener() {
+            @Override
+            public void onCameraIdle() {
+                try {
+                    List<Address> addressList = geocoder.getFromLocation(mMap.getCameraPosition().target.latitude,
+                            mMap.getCameraPosition().target.longitude, 1);
+                    if (!addressList.isEmpty()) {
+                        Log.i(Util.TAG, LOG_LABEL + " Address of the location :: " + addressList.get(0));
+                        pickLocationAddressView.setText(Util.getAddressAsString(addressList.get(0)));
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         });
         enableMyLocation();
@@ -308,8 +333,5 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onLocationChanged(Location location) {
         Log.i(Util.TAG, LOG_LABEL + " location of the device is changed");
-        LatLng coordinates = new LatLng(location.getLatitude(), location.getLongitude());
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(coordinates, 15));
-        pickUpLocationMarker.setPosition(coordinates);
     }
 }
