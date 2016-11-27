@@ -23,6 +23,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
@@ -52,7 +53,8 @@ import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback,
-        GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks, LocationListener {
+        GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks,
+        LocationListener, GoogleMap.OnMarkerClickListener, GoogleMap.OnInfoWindowClickListener {
     private static final String LOG_LABEL = "activities.MainActivity";
     private FirebaseUser firebaseUser;
     private FloatingActionButton startTripFab;
@@ -62,7 +64,8 @@ public class MainActivity extends AppCompatActivity
     private Location location;
     private Geocoder geocoder;
     private Marker pickUpLocationMarker;
-    private TextView pickLocationAddressView;
+    private TextView pickLocationAddressView, pickLocationHeading, destinationAddressView;
+    private LinearLayout pickUpLocationLayout, destinationLayout;
 
     /**
      * Request code for location permission request.
@@ -87,7 +90,10 @@ public class MainActivity extends AppCompatActivity
         firebaseUser = firebaseAuth.getCurrentUser();
 
         setContentView(R.layout.activity_main);
-
+        pickLocationHeading = (TextView) findViewById(R.id.location_pick_up_heading);
+        pickUpLocationLayout = (LinearLayout) findViewById(R.id.location_pick_up_address_layout);
+        destinationLayout = (LinearLayout) findViewById(R.id.location_destination_address_layout);
+        destinationAddressView = (TextView) findViewById(R.id.location_destination_address);
         FloatingActionButton myLocationFab = (FloatingActionButton) findViewById(R.id.my_location_fab);
         myLocationFab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -178,6 +184,9 @@ public class MainActivity extends AppCompatActivity
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         pickUpLocationMarker = mMap.addMarker(new MarkerOptions().title("PickUp Location").position(new LatLng(0, 0)).draggable(true));
+        pickUpLocationMarker.showInfoWindow();
+        mMap.setOnMarkerClickListener(this);
+        mMap.setOnInfoWindowClickListener(this);
         mMap.getUiSettings().setMyLocationButtonEnabled(false);
         mMap.setOnCameraMoveListener(new GoogleMap.OnCameraMoveListener() {
             @Override
@@ -333,5 +342,21 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onLocationChanged(Location location) {
         Log.i(Util.TAG, LOG_LABEL + " location of the device is changed");
+    }
+
+    @Override
+    public boolean onMarkerClick(Marker marker) {
+        showDestinationLayout();
+        return false;
+    }
+
+    @Override
+    public void onInfoWindowClick(Marker marker) {
+        showDestinationLayout();
+    }
+
+    private void showDestinationLayout() {
+        pickLocationHeading.setVisibility(View.GONE);
+        destinationLayout.setVisibility(View.VISIBLE);
     }
 }

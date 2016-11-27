@@ -54,6 +54,7 @@
             android:layout_marginStart="1dp"
             android:layout_marginTop="1dp"
             android:background="#ffffff"
+            android:clickable="true"
             android:elevation="10dp">
 
             <ImageView
@@ -88,6 +89,7 @@
         </LinearLayout>
 
         <LinearLayout
+            android:clickable="true"
             android:id="@+id/location_destination_address_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
