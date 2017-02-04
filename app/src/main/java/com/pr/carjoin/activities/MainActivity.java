@@ -1,6 +1,7 @@
 package com.pr.carjoin.activities;
 
 import android.Manifest;
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Address;
@@ -132,11 +133,11 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onClick(View view) {
                 if (validSourceDestination()) {
-                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://maps.google.com/maps?" +
-                            "saddr=" + pickUpLatLng.latitude + "," + pickUpLatLng.longitude + "&daddr=" +
-                            destLatLng.latitude + "," + destLatLng.longitude));
-                    intent.setClassName("com.google.android.apps.maps", "com.google.android.maps.MapsActivity");
-                    startActivity(intent);
+                    try {
+                        launchNavigationActivity();
+                    } catch (ActivityNotFoundException e) {
+                        Toast.makeText(MainActivity.this, "Please install the GoogleMaps Application", Toast.LENGTH_LONG).show();
+                    }
                 }
             }
         });
@@ -440,5 +441,13 @@ public class MainActivity extends AppCompatActivity
             }
         }
         return false;
+    }
+
+    private void launchNavigationActivity() {
+        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://maps.google.com/maps?" +
+                "saddr=" + pickUpLatLng.latitude + "," + pickUpLatLng.longitude + "&daddr=" +
+                destLatLng.latitude + "," + destLatLng.longitude));
+        intent.setClassName("com.google.android.apps.maps", "com.google.android.maps.MapsActivity");
+        startActivity(intent);
     }
 }
