@@ -6,6 +6,7 @@ import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -25,6 +26,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.google.android.gms.common.ConnectionResult;
@@ -61,7 +63,6 @@ public class MainActivity extends AppCompatActivity
         LocationListener, GoogleMap.OnMarkerClickListener, GoogleMap.OnInfoWindowClickListener {
     private static final String LOG_LABEL = "activities.MainActivity";
     private FirebaseUser firebaseUser;
-    private FloatingActionButton startTripFab;
     private GoogleMap mMap;
     private LocationRequest locationRequest;
     private GoogleApiClient mGoogleApiClient;
@@ -80,6 +81,7 @@ public class MainActivity extends AppCompatActivity
             }
         }
     };
+    private LatLng pickUpLatLng, destLatLng;
 
     /**
      * Request code for location permission request.
@@ -125,7 +127,19 @@ public class MainActivity extends AppCompatActivity
         });
         pickLocationAddressView = (TextView) findViewById(R.id.location_pick_up_address);
         geocoder = new Geocoder(this, Locale.getDefault());
-        startTripFab = (FloatingActionButton) findViewById(R.id.start_trip);
+        FloatingActionButton startTripFab = (FloatingActionButton) findViewById(R.id.start_trip);
+        startTripFab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (validSourceDestination()) {
+                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://maps.google.com/maps?" +
+                            "saddr=" + pickUpLatLng.latitude + "," + pickUpLatLng.longitude + "&daddr=" +
+                            destLatLng.latitude + "," + destLatLng.longitude));
+                    intent.setClassName("com.google.android.apps.maps", "com.google.android.maps.MapsActivity");
+                    startActivity(intent);
+                }
+            }
+        });
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitle("");
@@ -220,6 +234,7 @@ public class MainActivity extends AppCompatActivity
                             mMap.getCameraPosition().target.longitude, 1);
                     if (!addressList.isEmpty()) {
                         Log.i(Util.TAG, LOG_LABEL + " Address of the location :: " + addressList.get(0));
+                        pickUpLatLng = mMap.getCameraPosition().target;
                         pickLocationAddressView.setText(Util.getAddressAsString(addressList.get(0)));
                     }
                 } catch (IOException e) {
@@ -397,10 +412,12 @@ public class MainActivity extends AppCompatActivity
                         selectedPlace.getLatLng().longitude, 1);
                 switch (requestCode) {
                     case PICK_UP_PLACE_PICKER_REQUEST_CODE:
+                        pickUpLatLng = selectedPlace.getLatLng();
                         pickLocationAddressView.setText(Util.getAddressAsString(addresses.get(0)));
                         showDestinationLayout();
                         break;
                     case DESTINATION_PLACE_PICKER_REQUEST_CODE:
+                        destLatLng = selectedPlace.getLatLng();
                         destinationAddressView.setText(Util.getAddressAsString(addresses.get(0)));
                         break;
                 }
@@ -408,5 +425,20 @@ public class MainActivity extends AppCompatActivity
                 e.printStackTrace();
             }
         }
+    }
+
+    private boolean validSourceDestination() {
+        if (pickUpLatLng != null && destLatLng != null) {
+            return true;
+        } else {
+            if (pickUpLatLng == null) {
+                Toast.makeText(this, "Enter PickUp Location", Toast.LENGTH_SHORT).show();
+            }
+
+            if (destLatLng == null) {
+                Toast.makeText(this, "Enter Destination Location", Toast.LENGTH_SHORT).show();
+            }
+        }
+        return false;
     }
 }
