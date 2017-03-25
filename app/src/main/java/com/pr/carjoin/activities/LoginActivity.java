@@ -192,8 +192,4 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             finish();
         }
     }
-
-    private void saveUserDetailsInDB(FirebaseUser firebaseUser){
-
-    }
 }
