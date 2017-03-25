@@ -67,7 +67,6 @@ public class MainActivity extends AppCompatActivity
     private GoogleMap mMap;
     private LocationRequest locationRequest;
     private GoogleApiClient mGoogleApiClient;
-    private Location location;
     private Geocoder geocoder;
     private Marker pickUpLocationMarker;
     private TextView pickLocationAddressView, pickLocationHeading, destinationAddressView;
@@ -115,23 +114,10 @@ public class MainActivity extends AppCompatActivity
         destinationLayout = (LinearLayout) findViewById(R.id.location_destination_address_layout);
         destinationLayout.setOnClickListener(clickListener);
         destinationAddressView = (TextView) findViewById(R.id.location_destination_address);
-        FloatingActionButton myLocationFab = (FloatingActionButton) findViewById(R.id.my_location_fab);
-        myLocationFab.setOnClickListener(new View.OnClickListener() {
+        com.github.clans.fab.FloatingActionButton createTripButton = (com.github.clans.fab.FloatingActionButton) findViewById(R.id.trip_menu_option_create_trip);
+        createTripButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
-                if (location != null) {
-                    LatLng coordinates = new LatLng(location.getLatitude(), location.getLongitude());
-                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(coordinates, 15));
-                    pickUpLocationMarker.setPosition(coordinates);
-                }
-            }
-        });
-        pickLocationAddressView = (TextView) findViewById(R.id.location_pick_up_address);
-        geocoder = new Geocoder(this, Locale.getDefault());
-        FloatingActionButton startTripFab = (FloatingActionButton) findViewById(R.id.start_trip);
-        startTripFab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+            public void onClick(View v) {
                 if (validSourceDestination()) {
                     try {
                         launchNavigationActivity();
@@ -141,6 +127,28 @@ public class MainActivity extends AppCompatActivity
                 }
             }
         });
+        com.github.clans.fab.FloatingActionButton findTripButton = (com.github.clans.fab.FloatingActionButton) findViewById(R.id.trip_menu_option_find_trip);
+        findTripButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (validSourceDestination()) {
+                    try {
+                        launchNavigationActivity();
+                    } catch (ActivityNotFoundException e) {
+                        Toast.makeText(MainActivity.this, "Please install the GoogleMaps Application", Toast.LENGTH_LONG).show();
+                    }
+                }
+            }
+        });
+        FloatingActionButton myLocationFab = (FloatingActionButton) findViewById(R.id.my_location_fab);
+        myLocationFab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+            }
+        });
+        pickLocationAddressView = (TextView) findViewById(R.id.location_pick_up_address);
+        geocoder = new Geocoder(this, Locale.getDefault());
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitle("");
@@ -325,7 +333,7 @@ public class MainActivity extends AppCompatActivity
             // for ActivityCompat#requestPermissions for more details.
             return;
         }
-        location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+        Location location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
         LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient,
                 locationRequest, this);
         if (location != null) {

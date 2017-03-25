@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:fab="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/content_main2"
     android:layout_width="match_parent"
@@ -16,27 +17,54 @@
         android:layout_height="match_parent" />
     <!-- The navigation drawer -->
 
-    <android.support.design.widget.FloatingActionButton
-        android:layout_above="@+id/start_trip"
-        android:id="@+id/my_location_fab"
+    <com.github.clans.fab.FloatingActionMenu
+        android:id="@+id/trip_menu"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_above="@+id/my_location_fab"
         android:layout_alignParentEnd="true"
-        android:layout_marginStart="24dp"
         android:layout_marginBottom="16dp"
         android:layout_marginEnd="24dp"
-        android:src="@drawable/ic_my_location"
-        app:backgroundTint="#ffffff" />
+        android:layout_marginStart="24dp"
+        fab:fab_colorPressed="#0f00C853"
+        fab:fab_colorRipple="#00C853"
+        fab:menu_colorNormal="#00C853"
+        fab:menu_openDirection="up"
+        fab:menu_shadowColor="#444">
+
+        <com.github.clans.fab.FloatingActionButton
+            android:id="@+id/trip_menu_option_create_trip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_create_white"
+            fab:fab_colorNormal="#00C853"
+            fab:fab_colorPressed="#0f00C853"
+            fab:fab_colorRipple="#00C853"
+            fab:fab_label="Create Trip"
+            fab:fab_size="mini" />
+
+        <com.github.clans.fab.FloatingActionButton
+            android:id="@+id/trip_menu_option_find_trip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_icon_search_white"
+            fab:fab_colorNormal="#00C853"
+            fab:fab_colorPressed="#0f00C853"
+            fab:fab_colorRipple="#00C853"
+            fab:fab_label="Find Trip"
+            fab:fab_size="mini" />
+
+    </com.github.clans.fab.FloatingActionMenu>
 
     <android.support.design.widget.FloatingActionButton
-        android:id="@+id/start_trip"
-        android:src="@drawable/ic_icon_car"
-        android:layout_marginBottom="16dp"
-        android:layout_marginStart="24dp"
-        android:layout_marginEnd="24dp"
+        android:id="@+id/my_location_fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true"
-        app:backgroundTint="#00C853" />
+        android:layout_marginBottom="16dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginStart="24dp"
+        android:src="@drawable/ic_my_location"
+        app:backgroundTint="#ffffff" />
 </RelativeLayout>
