@@ -25,8 +25,11 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.pr.carjoin.R;
 import com.pr.carjoin.Util;
+import com.pr.carjoin.pojos.UserDetails;
 
 /**
  * Created by rohit on 14/6/15.
@@ -165,6 +168,10 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                             Log.w(Util.TAG, "signInWithCredential", task.getException());
                             Toast.makeText(LoginActivity.this, " Authentication failed for firebase.",
                                     Toast.LENGTH_SHORT).show();
+                        } else {
+                            DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference(Util.USERS);
+                            FirebaseUser firebaseUser = task.getResult().getUser();
+                            databaseReference.child(firebaseUser.getUid()).setValue(new UserDetails(firebaseUser));
                         }
                         // [START_EXCLUDE]
                         hideProgressDialog();

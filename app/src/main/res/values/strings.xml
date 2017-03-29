@@ -37,5 +37,21 @@
     <string name="string_search">Search</string>
     <string name="string_pick_up_location_caps">PICKUP LOCATION</string>
     <string name="string_select_destination">Select Destination</string>
-
+    <string name="string_start_date_time">Start DateTime</string>
+    <string name="string_end_date_time">End DateTime</string>
+    <string name="string_vehicle_name">Vehicle Name</string>
+    <string name="string_vehicle_number">Vehicle Number</string>
+    <string name="string_vehicle_color">Vehicle Color</string>
+    <string name="string_fuel_price">Fuel Price</string>
+    <string name="string_maintenance_per">Maintenance Per</string>
+    <string name="string_seats_available">Seats Available</string>
+    <string name="string_create">Create</string>
+    <string name="string_cancel">Cancel</string>
+    <string name="string_request">Request</string>
+    <string name="string_ignore">Ignore</string>
+    <string name="string_start_date">Start Date</string>
+    <string name="string_end_date">End Date</string>
+    <string name="string_source">Source : </string>
+    <string name="string_destination">Destination : </string>
+    <string name="string_no_trips_found">No Trips Found</string>
 </resources>

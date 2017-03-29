@@ -1,7 +1,6 @@
 package com.pr.carjoin.activities;
 
 import android.Manifest;
-import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Address;
@@ -49,19 +48,26 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.pr.carjoin.PermissionUtils;
 import com.pr.carjoin.R;
 import com.pr.carjoin.Util;
 import com.pr.carjoin.chat.ChatMainActivity;
+import com.pr.carjoin.customViews.CreateTripDialogFragment;
+import com.pr.carjoin.pojos.FirebaseTrip;
+import com.pr.carjoin.pojos.UserDetails;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback,
         GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks,
-        LocationListener, GoogleMap.OnMarkerClickListener, GoogleMap.OnInfoWindowClickListener {
+        LocationListener, GoogleMap.OnMarkerClickListener, GoogleMap.OnInfoWindowClickListener,
+        CreateTripDialogFragment.OnButtonClickListener {
     private static final String LOG_LABEL = "activities.MainActivity";
     private FirebaseUser firebaseUser;
     private GoogleMap mMap;
@@ -119,11 +125,7 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onClick(View v) {
                 if (validSourceDestination()) {
-                    try {
-                        launchNavigationActivity();
-                    } catch (ActivityNotFoundException e) {
-                        Toast.makeText(MainActivity.this, "Please install the GoogleMaps Application", Toast.LENGTH_LONG).show();
-                    }
+                    showCreateTripDialog();
                 }
             }
         });
@@ -132,11 +134,7 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onClick(View v) {
                 if (validSourceDestination()) {
-                    try {
-                        launchNavigationActivity();
-                    } catch (ActivityNotFoundException e) {
-                        Toast.makeText(MainActivity.this, "Please install the GoogleMaps Application", Toast.LENGTH_LONG).show();
-                    }
+                    launchListTripActivity();
                 }
             }
         });
@@ -456,6 +454,46 @@ public class MainActivity extends AppCompatActivity
                 "saddr=" + pickUpLatLng.latitude + "," + pickUpLatLng.longitude + "&daddr=" +
                 destLatLng.latitude + "," + destLatLng.longitude));
         intent.setClassName("com.google.android.apps.maps", "com.google.android.maps.MapsActivity");
+        startActivity(intent);
+    }
+
+    private void createTrip(FirebaseTrip trip) {
+        trip.published = true;
+        trip.sourceLat = pickUpLatLng.latitude;
+        trip.sourceLong = pickUpLatLng.longitude;
+        trip.sourceAddress = String.valueOf(pickLocationAddressView.getText());
+        trip.destLat = destLatLng.latitude;
+        trip.destLong = destLatLng.longitude;
+        trip.destAddress = String.valueOf(destinationAddressView.getText());
+        trip.lastModified = new Date().getTime();
+        UserDetails userDetails = new UserDetails(firebaseUser);
+        userDetails.id = firebaseUser.getUid();
+        trip.userDetails = userDetails;
+        trip.started = false;
+        trip.completed = false;
+        DatabaseReference database = FirebaseDatabase.getInstance().getReference();
+        database.child(Util.TRIPS).push().setValue(trip);
+
+    }
+
+    private void showCreateTripDialog() {
+        CreateTripDialogFragment createTripDialogFragment = new CreateTripDialogFragment();
+        createTripDialogFragment.registerCallback(this);
+        createTripDialogFragment.show(getSupportFragmentManager(), LOG_LABEL);
+    }
+
+    @Override
+    public void onPositiveButtonClick(FirebaseTrip trip) {
+        createTrip(trip);
+    }
+
+    @Override
+    public void onNegativeButtonClick() {
+
+    }
+
+    private void launchListTripActivity() {
+        Intent intent = new Intent(this, ListTripActivity.class);
         startActivity(intent);
     }
 }
