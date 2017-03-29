@@ -54,4 +54,5 @@
     <string name="string_source">Source : </string>
     <string name="string_destination">Destination : </string>
     <string name="string_no_trips_found">No Trips Found</string>
+    <string name="string_send">send</string>
 </resources>
