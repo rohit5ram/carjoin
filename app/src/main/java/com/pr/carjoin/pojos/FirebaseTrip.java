@@ -1,6 +1,6 @@
 package com.pr.carjoin.pojos;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Created by vishnu on 28/3/17.
@@ -29,7 +29,7 @@ public class FirebaseTrip {
     public String vehicleNumber;
     public int seatsAvailable;
     public UserDetails userDetails;
-    public ArrayList<Request> requests;
+    public HashMap<String, Request> requests;
 
     public FirebaseTrip() {
     }

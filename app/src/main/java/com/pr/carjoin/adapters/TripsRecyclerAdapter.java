@@ -25,8 +25,8 @@ import com.pr.carjoin.pojos.UserDetails;
 
 import java.lang.ref.WeakReference;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
@@ -90,13 +90,7 @@ public class TripsRecyclerAdapter extends RecyclerView.Adapter<TripsRecyclerAdap
                     newRequest.userDetails = new UserDetails(FirebaseAuth.getInstance().getCurrentUser());
                     newRequest.userDetails.id = FirebaseAuth.getInstance().getCurrentUser().getUid();
                     newRequest.status = Constants.PENDING;
-                    if (trip.requests == null) {
-                        trip.requests = new ArrayList<>();
-                        trip.requests.add(newRequest);
-                    } else {
-                        trip.requests.add(newRequest);
-                    }
-                    databaseReference.setValue(trip.requests).addOnCompleteListener(activityWeakReference.get(), new OnCompleteListener<Void>() {
+                    databaseReference.push().setValue(newRequest).addOnCompleteListener(activityWeakReference.get(), new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
                             if (task.isSuccessful()) {
@@ -110,10 +104,10 @@ public class TripsRecyclerAdapter extends RecyclerView.Adapter<TripsRecyclerAdap
         }
     }
 
-    private Request checkIfUserAlreadyExistsInRequests(ArrayList<Request> requests) {
-        if (requests != null) {
+    private Request checkIfUserAlreadyExistsInRequests(HashMap<String, Request> requests) {
+        if (requests != null && requests.size() > 0) {
             String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-            for (Request request : requests) {
+            for (Request request : requests.values()) {
                 if (request.userDetails.id.equals(userId)) {
                     return request;
                 }
