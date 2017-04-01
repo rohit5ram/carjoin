@@ -76,13 +76,13 @@
             android:gravity="end"
             android:orientation="horizontal">
 
-            <Button
+            <!--<Button
                 android:id="@+id/ignore_button"
                 style="@style/Widget.AppCompat.Button.Borderless"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/string_ignore"
-                android:textColor="#EF5350" />
+                android:textColor="#EF5350" />-->
 
             <Button
                 android:id="@+id/request_button"

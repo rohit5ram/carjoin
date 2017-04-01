@@ -56,6 +56,7 @@ public class ListTripActivity extends AppCompatActivity {
                     if (firebaseUser != null && trip.published && !trip.started && !trip.completed
                             && !trip.userDetails.id.equals(firebaseUser.getUid()) && trip.endDate > new Date().getTime()
                             && trip.beginDate < trip.endDate) {
+                        trip.id = child.getKey();
                         tripsList.add(trip);
                     }
                 }
@@ -76,7 +77,7 @@ public class ListTripActivity extends AppCompatActivity {
         progressBar.setVisibility(View.GONE);
         if (tripsList.size() > 0) {
             RecyclerView recyclerView = (RecyclerView) findViewById(R.id.trips_list);
-            recyclerView.setAdapter(new TripsRecyclerAdapter(tripsList));
+            recyclerView.setAdapter(new TripsRecyclerAdapter(tripsList, this));
             recyclerView.setLayoutManager(new LinearLayoutManager(this));
             recyclerView.setItemAnimator(new DefaultItemAnimator());
             recyclerView.setVisibility(View.VISIBLE);
