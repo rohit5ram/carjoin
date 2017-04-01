@@ -84,7 +84,8 @@ public class TripsRecyclerAdapter extends RecyclerView.Adapter<TripsRecyclerAdap
             holder.getRequest().setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(final View v) {
-                    DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference(Util.TRIPS).child(trip.id);
+                    DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference(Util.TRIPS)
+                            .child(trip.id).child("requests");
                     Request newRequest = new Request();
                     newRequest.userDetails = new UserDetails(FirebaseAuth.getInstance().getCurrentUser());
                     newRequest.userDetails.id = FirebaseAuth.getInstance().getCurrentUser().getUid();
@@ -95,7 +96,7 @@ public class TripsRecyclerAdapter extends RecyclerView.Adapter<TripsRecyclerAdap
                     } else {
                         trip.requests.add(newRequest);
                     }
-                    databaseReference.setValue(trip).addOnCompleteListener(activityWeakReference.get(), new OnCompleteListener<Void>() {
+                    databaseReference.setValue(trip.requests).addOnCompleteListener(activityWeakReference.get(), new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
                             if (task.isSuccessful()) {
