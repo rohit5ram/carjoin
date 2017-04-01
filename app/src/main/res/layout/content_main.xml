@@ -17,54 +17,49 @@
         android:layout_height="match_parent" />
     <!-- The navigation drawer -->
 
-    <com.github.clans.fab.FloatingActionMenu
-        android:id="@+id/trip_menu"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/my_location_fab"
-        android:layout_alignParentEnd="true"
-        android:layout_marginBottom="16dp"
-        android:layout_marginEnd="24dp"
-        android:layout_marginStart="24dp"
-        fab:fab_colorPressed="#0f00C853"
-        fab:fab_colorRipple="#00C853"
-        fab:menu_colorNormal="#00C853"
-        fab:menu_openDirection="up"
-        fab:menu_shadowColor="#444">
-
-        <com.github.clans.fab.FloatingActionButton
-            android:id="@+id/trip_menu_option_create_trip"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_create_white"
-            fab:fab_colorNormal="#00C853"
-            fab:fab_colorPressed="#0f00C853"
-            fab:fab_colorRipple="#00C853"
-            fab:fab_label="Create Trip"
-            fab:fab_size="mini" />
-
-        <com.github.clans.fab.FloatingActionButton
-            android:id="@+id/trip_menu_option_find_trip"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_icon_search_white"
-            fab:fab_colorNormal="#00C853"
-            fab:fab_colorPressed="#0f00C853"
-            fab:fab_colorRipple="#00C853"
-            fab:fab_label="Find Trip"
-            fab:fab_size="mini" />
-
-    </com.github.clans.fab.FloatingActionMenu>
-
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/my_location_fab"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_alignParentEnd="true"
-        android:layout_marginBottom="16dp"
-        android:layout_marginEnd="24dp"
-        android:layout_marginStart="24dp"
-        android:src="@drawable/ic_my_location"
-        app:backgroundTint="#ffffff" />
+        android:layout_margin="16dp"
+        android:orientation="vertical">
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/my_location_fab"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:layout_marginBottom="16dp"
+            android:src="@drawable/ic_my_location"
+            app:backgroundTint="#ffffff" />
+
+        <LinearLayout
+            android:id="@+id/buttons_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <Button
+                android:id="@+id/find_trip"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="#000000"
+                android:text="@string/string_find_trip"
+                android:textAllCaps="true"
+                android:textColor="#ffffff"
+                android:visibility="gone" />
+
+            <Button
+                android:id="@+id/create_trip"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="#000000"
+                android:text="@string/string_create_trip"
+                android:textAllCaps="true"
+                android:textColor="#ffffff"
+                android:visibility="gone" />
+        </LinearLayout>
+    </LinearLayout>
 </RelativeLayout>

@@ -19,10 +19,13 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -77,6 +80,7 @@ public class MainActivity extends AppCompatActivity
     private Marker pickUpLocationMarker;
     private TextView pickLocationAddressView, pickLocationHeading, destinationAddressView;
     private LinearLayout destinationLayout;
+    private Button createTripButton, findTripButton;
     private View.OnClickListener clickListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
@@ -88,6 +92,7 @@ public class MainActivity extends AppCompatActivity
         }
     };
     private LatLng pickUpLatLng, destLatLng;
+    private Location userCurrentLocation;
 
     /**
      * Request code for location permission request.
@@ -117,10 +122,7 @@ public class MainActivity extends AppCompatActivity
         pickLocationHeading = (TextView) findViewById(R.id.location_pick_up_heading);
         LinearLayout pickUpLocationLayout = (LinearLayout) findViewById(R.id.location_pick_up_address_layout);
         pickUpLocationLayout.setOnClickListener(clickListener);
-        destinationLayout = (LinearLayout) findViewById(R.id.location_destination_address_layout);
-        destinationLayout.setOnClickListener(clickListener);
-        destinationAddressView = (TextView) findViewById(R.id.location_destination_address);
-        com.github.clans.fab.FloatingActionButton createTripButton = (com.github.clans.fab.FloatingActionButton) findViewById(R.id.trip_menu_option_create_trip);
+        createTripButton = (Button) findViewById(R.id.create_trip);
         createTripButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -129,7 +131,7 @@ public class MainActivity extends AppCompatActivity
                 }
             }
         });
-        com.github.clans.fab.FloatingActionButton findTripButton = (com.github.clans.fab.FloatingActionButton) findViewById(R.id.trip_menu_option_find_trip);
+        findTripButton = (Button) findViewById(R.id.find_trip);
         findTripButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -138,11 +140,44 @@ public class MainActivity extends AppCompatActivity
                 }
             }
         });
+        destinationLayout = (LinearLayout) findViewById(R.id.location_destination_address_layout);
+        destinationLayout.setOnClickListener(clickListener);
+        destinationAddressView = (TextView) findViewById(R.id.location_destination_address);
+        destinationAddressView.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                if (editable.length() > 0) {
+                    FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+                    if (firebaseUser != null) {
+                        if (firebaseUser.getEmail().equals("rohit5ram@gmail.com"))
+                            createTripButton.setVisibility(View.VISIBLE);
+                        else findTripButton.setVisibility(View.VISIBLE);
+                    }
+                } else {
+                    createTripButton.setVisibility(View.GONE);
+                    findTripButton.setVisibility(View.GONE);
+                }
+            }
+        });
         FloatingActionButton myLocationFab = (FloatingActionButton) findViewById(R.id.my_location_fab);
         myLocationFab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                if (pickUpLocationMarker != null && userCurrentLocation != null) {
+                    LatLng userCurrentLatLong = new LatLng(userCurrentLocation.getLatitude(), userCurrentLocation.getLongitude());
+                    pickUpLocationMarker.setPosition(userCurrentLatLong);
+                    mMap.moveCamera(CameraUpdateFactory.newLatLng(userCurrentLatLong));
+                }
             }
         });
         pickLocationAddressView = (TextView) findViewById(R.id.location_pick_up_address);
@@ -339,6 +374,7 @@ public class MainActivity extends AppCompatActivity
             LatLng coordinates = new LatLng(location.getLatitude(), location.getLongitude());
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(coordinates, 15));
             pickUpLocationMarker.setPosition(coordinates);
+            userCurrentLocation = location;
         }
     }
 
@@ -382,6 +418,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onLocationChanged(Location location) {
         Log.i(Util.TAG, LOG_LABEL + " location of the device is changed");
+        userCurrentLocation = location;
     }
 
     @Override
