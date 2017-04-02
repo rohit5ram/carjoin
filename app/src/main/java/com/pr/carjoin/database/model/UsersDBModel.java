@@ -8,8 +8,8 @@ import java.util.UUID;
 /**
  * Created by rohit on 31/5/15.
  */
-public class Users {
-    public static final String TABLE_NAME = "Users";
+public class UsersDBModel {
+    public static final String TABLE_NAME = "UsersDBModel";
 
     public static final String COL_ID = "ID";
     public static final String COL_FIRST_NAME = "FIRST_NAME";
@@ -45,7 +45,7 @@ public class Users {
     public int mobile = -1;
     public long lastModified = -1;
 
-    public Users(Cursor cursor) {
+    public UsersDBModel(Cursor cursor) {
         this.id = cursor.getString(0);
         this.firstName = cursor.getString(1);
         this.lastName = cursor.getString(2);

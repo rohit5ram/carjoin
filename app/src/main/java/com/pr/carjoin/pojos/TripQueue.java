@@ -4,11 +4,12 @@ package com.pr.carjoin.pojos;
  * Created by vishnu on 1/4/17.
  */
 
-public class Request {
+public class TripQueue {
 
-    public UserDetails userDetails;
+    public String name;
     public String status;
+    public String type;
 
-    public Request() {
+    public TripQueue() {
     }
 }

@@ -49,17 +49,21 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.pr.carjoin.Constants;
 import com.pr.carjoin.PermissionUtils;
 import com.pr.carjoin.R;
 import com.pr.carjoin.Util;
 import com.pr.carjoin.chat.ChatMainActivity;
 import com.pr.carjoin.customViews.CreateTripDialogFragment;
-import com.pr.carjoin.pojos.FirebaseTrip;
-import com.pr.carjoin.pojos.UserDetails;
+import com.pr.carjoin.pojos.Trip;
+import com.pr.carjoin.pojos.TripQueue;
+import com.pr.carjoin.pojos.Vehicle;
 
 import java.io.IOException;
 import java.util.Date;
@@ -95,7 +99,7 @@ public class MainActivity extends AppCompatActivity
     private Location userCurrentLocation;
 
     /**
-     * Request code for location permission request.
+     * TripQueue code for location permission request.
      *
      * @see #onRequestPermissionsResult(int, String[], int[])
      */
@@ -158,7 +162,8 @@ public class MainActivity extends AppCompatActivity
             public void afterTextChanged(Editable editable) {
                 if (editable.length() > 0) {
                     FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
-                    if (firebaseUser != null) {
+                    // should remove the vishnu@yantranet.com
+                    if (firebaseUser != null && firebaseUser.getEmail() != null) {
                         if (firebaseUser.getEmail().equals("rohit5ram@gmail.com"))
                             createTripButton.setVisibility(View.VISIBLE);
                         else findTripButton.setVisibility(View.VISIBLE);
@@ -288,14 +293,16 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void setNavHeader(View headerView) {
-        ImageView imageView = (ImageView) headerView.findViewById(R.id.nav_header_imageView);
-        Glide.with(this).load(firebaseUser.getPhotoUrl()).into(imageView);
+        if (firebaseUser != null) {
+            ImageView imageView = (ImageView) headerView.findViewById(R.id.nav_header_imageView);
+            Glide.with(this).load(firebaseUser.getPhotoUrl()).into(imageView);
 
-        TextView userNameView = (TextView) headerView.findViewById(R.id.nav_header_title);
-        userNameView.setText(firebaseUser.getDisplayName());
+            TextView userNameView = (TextView) headerView.findViewById(R.id.nav_header_title);
+            userNameView.setText(firebaseUser.getDisplayName());
 
-        TextView emailView = (TextView) headerView.findViewById(R.id.nav_header_sub_title);
-        emailView.setText(firebaseUser.getEmail());
+            TextView emailView = (TextView) headerView.findViewById(R.id.nav_header_sub_title);
+            emailView.setText(firebaseUser.getEmail());
+        }
     }
 
     /**
@@ -494,23 +501,43 @@ public class MainActivity extends AppCompatActivity
         startActivity(intent);
     }
 
-    private void createTrip(FirebaseTrip trip) {
-        trip.published = true;
-        trip.sourceLat = pickUpLatLng.latitude;
-        trip.sourceLong = pickUpLatLng.longitude;
-        trip.sourceAddress = String.valueOf(pickLocationAddressView.getText());
-        trip.destLat = destLatLng.latitude;
-        trip.destLong = destLatLng.longitude;
-        trip.destAddress = String.valueOf(destinationAddressView.getText());
-        trip.lastModified = new Date().getTime();
-        UserDetails userDetails = new UserDetails(firebaseUser);
-        userDetails.id = firebaseUser.getUid();
-        trip.userDetails = userDetails;
-        trip.started = false;
-        trip.completed = false;
-        DatabaseReference database = FirebaseDatabase.getInstance().getReference();
-        database.child(Util.TRIPS).push().setValue(trip);
+    private void createTrip(Trip trip) {
+        if (firebaseUser != null) {
+            trip.published = true;
+            trip.sourceLat = pickUpLatLng.latitude;
+            trip.sourceLong = pickUpLatLng.longitude;
+            trip.sourceAddress = String.valueOf(pickLocationAddressView.getText());
+            trip.destLat = destLatLng.latitude;
+            trip.destLong = destLatLng.longitude;
+            trip.destAddress = String.valueOf(destinationAddressView.getText());
+            trip.timeStamp = new Date().getTime();
+            trip.owner = new Trip.Owner();
+            trip.owner.id = firebaseUser.getUid();
+            trip.owner.name = firebaseUser.getDisplayName();
+            trip.owner.email = firebaseUser.getEmail();
+            trip.owner.photoURL = String.valueOf(firebaseUser.getPhotoUrl());
+            trip.started = false;
+            trip.completed = false;
+            DatabaseReference database = FirebaseDatabase.getInstance().getReference().child(Util.TRIPS).push();
+            final String tripId = database.getKey();
+            database.setValue(trip).addOnCompleteListener(this, new OnCompleteListener<Void>() {
+                @Override
+                public void onComplete(@NonNull Task<Void> task) {
+                    if (task.isSuccessful()) {
+                        createTripQueue(tripId, firebaseUser.getUid(), firebaseUser.getDisplayName());
+                    }
+                }
+            });
+        }
+    }
 
+    private void createTripQueue(String tripId, String firebaseUserId, String firebaseUserName) {
+        TripQueue tripQueue = new TripQueue();
+        tripQueue.name = firebaseUserName;
+        tripQueue.status = "";
+        tripQueue.type = Constants.OWNER;
+        FirebaseDatabase.getInstance().getReference().child(Util.TRIP_QUEUE).child(tripId)
+                .child(firebaseUserId).setValue(tripQueue);
     }
 
     private void showCreateTripDialog() {
@@ -520,8 +547,14 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onPositiveButtonClick(FirebaseTrip trip) {
+    public void onPositiveButtonClick(Trip trip, Vehicle vehicle) {
         createTrip(trip);
+        pushVehicle(trip.vehicleRegId, vehicle);
+    }
+
+    private void pushVehicle(String vehicleRegID, Vehicle vehicle) {
+        DatabaseReference database = FirebaseDatabase.getInstance().getReference();
+        database.child(Util.VEHICLES).child(vehicleRegID).setValue(vehicle);
     }
 
     @Override

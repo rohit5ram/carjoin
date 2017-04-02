@@ -8,8 +8,8 @@ import java.util.UUID;
 /**
  * Created by rohit on 31/5/15.
  */
-public class Trips {
-    public static final String TABLE_NAME = "Trips";
+public class TripsDBModel {
+    public static final String TABLE_NAME = "TripsDBModel";
 
     public static final String COL_ID = "ID";
     public static final String COL_START_KMS_READING = "START_KMS_READING";
@@ -71,7 +71,7 @@ public class Trips {
     public double tripTotCost = -1;
     public long lastModified = -1;
 
-    public Trips(Cursor cursor) {
+    public TripsDBModel(Cursor cursor) {
         this.id = cursor.getString(0);
         this.startKmsReading = cursor.getInt(1);
         this.sourceLat = cursor.getDouble(2);

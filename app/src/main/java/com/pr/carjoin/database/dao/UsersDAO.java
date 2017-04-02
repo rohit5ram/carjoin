@@ -6,7 +6,7 @@ import android.database.sqlite.SQLiteDatabase;
 
 import com.pr.carjoin.Util;
 import com.pr.carjoin.database.DatabaseHelper;
-import com.pr.carjoin.database.model.Users;
+import com.pr.carjoin.database.model.UsersDBModel;
 
 /**
  * Created by rohit on 13/6/15.
@@ -37,8 +37,8 @@ public class UsersDAO {
             final SQLiteDatabase db = dbHelper.getReadableDatabase();
 
             cursor = db.query(
-                    Users.TABLE_NAME,
-                    Users.FIELDS,
+                    UsersDBModel.TABLE_NAME,
+                    UsersDBModel.FIELDS,
                     null, null, null, null, null, null
             );
         } catch (Exception e) {
@@ -54,9 +54,9 @@ public class UsersDAO {
             final SQLiteDatabase db = dbHelper.getReadableDatabase();
 
             cursor = db.query(
-                    Users.TABLE_NAME,
-                    Users.FIELDS,
-                    Users.COL_ID + " IS ? ",
+                    UsersDBModel.TABLE_NAME,
+                    UsersDBModel.FIELDS,
+                    UsersDBModel.COL_ID + " IS ? ",
                     new String[]{id},
                     null, null, null, null
             );
@@ -67,18 +67,18 @@ public class UsersDAO {
         return cursor;
     }
 
-    public synchronized boolean putUsers(final Users users) {
+    public synchronized boolean putUsers(final UsersDBModel usersDBModel) {
         boolean success = false;
         int result = 0;
         try {
             final SQLiteDatabase db = dbHelper.getWritableDatabase();
 
-            if (users.id != null) {
+            if (usersDBModel.id != null) {
                 result += db.update(
-                        Users.TABLE_NAME,
-                        users.getContent(),
-                        Users.COL_ID + " IS ? ",
-                        new String[]{users.id}
+                        UsersDBModel.TABLE_NAME,
+                        usersDBModel.getContent(),
+                        UsersDBModel.COL_ID + " IS ? ",
+                        new String[]{usersDBModel.id}
                 );
             }
 
@@ -86,9 +86,9 @@ public class UsersDAO {
                 success = true;
             } else {
                 final long rowId = db.insert(
-                        Users.TABLE_NAME,
+                        UsersDBModel.TABLE_NAME,
                         null,
-                        users.getContent()
+                        usersDBModel.getContent()
                 );
 
                 if (rowId > -1) {
@@ -107,8 +107,8 @@ public class UsersDAO {
         Cursor usersCursor = getUsersCursor();
         try {
             if (usersCursor != null && usersCursor.moveToLast()) {
-                Users users = new Users(usersCursor);
-                usersId = users.id;
+                UsersDBModel usersDBModel = new UsersDBModel(usersCursor);
+                usersId = usersDBModel.id;
             }
         } catch (Exception e) {
             Util.logException(e, LOG_LABEL);
@@ -124,12 +124,12 @@ public class UsersDAO {
         return usersId;
     }
 
-    public synchronized Users getUsers() {
+    public synchronized UsersDBModel getUsers() {
         Cursor usersCursor = getUsersCursor();
-        Users users = null;
+        UsersDBModel usersDBModel = null;
         try {
             if (usersCursor != null && usersCursor.moveToLast()) {
-                users = new Users(usersCursor);
+                usersDBModel = new UsersDBModel(usersCursor);
             }
         } catch (Exception e) {
             Util.logException(e, LOG_LABEL);
@@ -142,17 +142,17 @@ public class UsersDAO {
                 Util.logException(e, LOG_LABEL);
             }
         }
-        return users;
+        return usersDBModel;
     }
 
-    public synchronized boolean deleteUsers(Users users) {
+    public synchronized boolean deleteUsers(UsersDBModel usersDBModel) {
         int result = -1;
         try {
             final SQLiteDatabase db = dbHelper.getWritableDatabase();
             result = db.delete(
-                    Users.TABLE_NAME,
-                    Users.COL_ID + " IS ? ",
-                    new String[]{String.valueOf(users.id)}
+                    UsersDBModel.TABLE_NAME,
+                    UsersDBModel.COL_ID + " IS ? ",
+                    new String[]{String.valueOf(usersDBModel.id)}
             );
         } catch (Exception e) {
             Util.logException(e, LOG_LABEL);
@@ -171,7 +171,7 @@ public class UsersDAO {
             final SQLiteDatabase db = dbHelper.getReadableDatabase();
 
             cursor = db.query(
-                    Users.TABLE_NAME,
+                    UsersDBModel.TABLE_NAME,
                     projection,
                     selection, selectionArgs, null, null, sortOrder, null
             );

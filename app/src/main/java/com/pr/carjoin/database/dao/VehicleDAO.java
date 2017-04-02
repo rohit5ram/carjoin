@@ -6,7 +6,7 @@ import android.database.sqlite.SQLiteDatabase;
 
 import com.pr.carjoin.Util;
 import com.pr.carjoin.database.DatabaseHelper;
-import com.pr.carjoin.database.model.Vehicle;
+import com.pr.carjoin.database.model.VehicleDBModel;
 
 /**
  * Created by rohit on 14/6/15.
@@ -37,8 +37,8 @@ public class VehicleDAO {
             final SQLiteDatabase db = dbHelper.getReadableDatabase();
 
             cursor = db.query(
-                    Vehicle.TABLE_NAME,
-                    Vehicle.FIELDS,
+                    VehicleDBModel.TABLE_NAME,
+                    VehicleDBModel.FIELDS,
                     null, null, null, null, null, null
             );
         } catch (Exception e) {
@@ -54,9 +54,9 @@ public class VehicleDAO {
             final SQLiteDatabase db = dbHelper.getReadableDatabase();
 
             cursor = db.query(
-                    Vehicle.TABLE_NAME,
-                    Vehicle.FIELDS,
-                    Vehicle.COL_ID + " IS ? ",
+                    VehicleDBModel.TABLE_NAME,
+                    VehicleDBModel.FIELDS,
+                    VehicleDBModel.COL_ID + " IS ? ",
                     new String[]{id},
                     null, null, null, null
             );
@@ -67,18 +67,18 @@ public class VehicleDAO {
         return cursor;
     }
 
-    public synchronized boolean putVehicle(final Vehicle vehicle) {
+    public synchronized boolean putVehicle(final VehicleDBModel vehicleDBModel) {
         boolean success = false;
         int result = 0;
         try {
             final SQLiteDatabase db = dbHelper.getWritableDatabase();
 
-            if (vehicle.id != null) {
+            if (vehicleDBModel.id != null) {
                 result += db.update(
-                        Vehicle.TABLE_NAME,
-                        vehicle.getContent(),
-                        Vehicle.COL_ID + " IS ? ",
-                        new String[]{vehicle.id}
+                        VehicleDBModel.TABLE_NAME,
+                        vehicleDBModel.getContent(),
+                        VehicleDBModel.COL_ID + " IS ? ",
+                        new String[]{vehicleDBModel.id}
                 );
             }
 
@@ -86,9 +86,9 @@ public class VehicleDAO {
                 success = true;
             } else {
                 final long rowId = db.insert(
-                        Vehicle.TABLE_NAME,
+                        VehicleDBModel.TABLE_NAME,
                         null,
-                        vehicle.getContent()
+                        vehicleDBModel.getContent()
                 );
 
                 if (rowId > -1) {
@@ -107,8 +107,8 @@ public class VehicleDAO {
         Cursor vehicleCursor = getVehicleCursor();
         try {
             if (vehicleCursor != null && vehicleCursor.moveToLast()) {
-                Vehicle vehicle = new Vehicle(vehicleCursor);
-                vehicleId = vehicle.id;
+                VehicleDBModel vehicleDBModel = new VehicleDBModel(vehicleCursor);
+                vehicleId = vehicleDBModel.id;
             }
         } catch (Exception e) {
             Util.logException(e, LOG_LABEL);
@@ -124,12 +124,12 @@ public class VehicleDAO {
         return vehicleId;
     }
 
-    public synchronized Vehicle getVehicle() {
+    public synchronized VehicleDBModel getVehicle() {
         Cursor vehicleCursor = getVehicleCursor();
-        Vehicle vehicle = null;
+        VehicleDBModel vehicleDBModel = null;
         try {
             if (vehicleCursor != null && vehicleCursor.moveToLast()) {
-                vehicle = new Vehicle(vehicleCursor);
+                vehicleDBModel = new VehicleDBModel(vehicleCursor);
             }
         } catch (Exception e) {
             Util.logException(e, LOG_LABEL);
@@ -142,17 +142,17 @@ public class VehicleDAO {
                 Util.logException(e, LOG_LABEL);
             }
         }
-        return vehicle;
+        return vehicleDBModel;
     }
 
-    public synchronized boolean deleteVehicle(Vehicle vehicle) {
+    public synchronized boolean deleteVehicle(VehicleDBModel vehicleDBModel) {
         int result = -1;
         try {
             final SQLiteDatabase db = dbHelper.getWritableDatabase();
             result = db.delete(
-                    Vehicle.TABLE_NAME,
-                    Vehicle.COL_ID + " IS ? ",
-                    new String[]{String.valueOf(vehicle.id)}
+                    VehicleDBModel.TABLE_NAME,
+                    VehicleDBModel.COL_ID + " IS ? ",
+                    new String[]{String.valueOf(vehicleDBModel.id)}
             );
         } catch (Exception e) {
             Util.logException(e, LOG_LABEL);
@@ -171,7 +171,7 @@ public class VehicleDAO {
             final SQLiteDatabase db = dbHelper.getReadableDatabase();
 
             cursor = db.query(
-                    Vehicle.TABLE_NAME,
+                    VehicleDBModel.TABLE_NAME,
                     projection,
                     selection, selectionArgs, null, null, sortOrder, null
             );

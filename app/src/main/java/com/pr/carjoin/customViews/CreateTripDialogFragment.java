@@ -12,8 +12,10 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.pr.carjoin.R;
-import com.pr.carjoin.pojos.FirebaseTrip;
+import com.pr.carjoin.pojos.Trip;
+import com.pr.carjoin.pojos.Vehicle;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -30,7 +32,7 @@ public class CreateTripDialogFragment extends DialogFragment implements View.OnC
     private static final String LOG_LABEL = "customViews.CreateTripDialogFragment";
     private TextView startTime, endTime, startDate, endDate;
     private EditText vehicleName, vehicleNumber, vehicleColor, fuelPrice,
-            maintenancePer, seats;
+            maintenancePer, seats, vehicleType;
     private OnButtonClickListener onButtonClickListener;
     private long startDateTimeInMills = 0, endDateTimeInMills = 0;
 
@@ -65,6 +67,7 @@ public class CreateTripDialogFragment extends DialogFragment implements View.OnC
         fuelPrice = (EditText) rootView.findViewById(R.id.fuel_price);
         maintenancePer = (EditText) rootView.findViewById(R.id.maintenance_per);
         seats = (EditText) rootView.findViewById(R.id.seats_available);
+        vehicleType = (EditText) rootView.findViewById(R.id.vehicle_type);
 
         Button createButton = (Button) rootView.findViewById(R.id.create_action);
         createButton.setOnClickListener(this);
@@ -130,20 +133,31 @@ public class CreateTripDialogFragment extends DialogFragment implements View.OnC
             seats.setError("Shouldn't be Empty");
             return false;
         }
+        if (TextUtils.isEmpty(vehicleType.getText())) {
+            vehicleType.setError("Shouldn't be Empty");
+            return false;
+        }
         return true;
     }
 
-    private FirebaseTrip getDetails() {
-        FirebaseTrip firebaseTrip = new FirebaseTrip();
-        firebaseTrip.beginDate = startDateTimeInMills;
-        firebaseTrip.endDate = endDateTimeInMills;
-        firebaseTrip.fuelPrice = Double.parseDouble(fuelPrice.getText().toString());
-        firebaseTrip.maintenancePer = Double.parseDouble(maintenancePer.getText().toString());
-        firebaseTrip.vehicleName = vehicleName.getText().toString();
-        firebaseTrip.vehicleColor = vehicleColor.getText().toString();
-        firebaseTrip.vehicleNumber = vehicleNumber.getText().toString();
-        firebaseTrip.seatsAvailable = Integer.parseInt(seats.getText().toString());
-        return firebaseTrip;
+    private Trip getTripDetails() {
+        Trip trip = new Trip();
+        trip.beginDateTimeMills = startDateTimeInMills;
+        trip.endDateTimeMills = endDateTimeInMills;
+        trip.fuelPricePerLitre = Double.parseDouble(fuelPrice.getText().toString());
+        trip.maintenancePercentage = Double.parseDouble(maintenancePer.getText().toString());
+        trip.vehicleRegId = vehicleNumber.getText().toString();
+        trip.seatsAvailable = Integer.parseInt(seats.getText().toString());
+        return trip;
+    }
+
+    private Vehicle getVehicleDetails() {
+        Vehicle vehicle = new Vehicle();
+        vehicle.color = vehicleColor.getText().toString();
+        vehicle.name = vehicleName.getText().toString();
+        vehicle.type = vehicleType.getText().toString();
+        vehicle.owner = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        return vehicle;
     }
 
     @Override
@@ -152,7 +166,7 @@ public class CreateTripDialogFragment extends DialogFragment implements View.OnC
             switch (v.getId()) {
                 case R.id.create_action:
                     if (onButtonClickListener != null && validateDetails()) {
-                        onButtonClickListener.onPositiveButtonClick(getDetails());
+                        onButtonClickListener.onPositiveButtonClick(getTripDetails(), getVehicleDetails());
                         dismiss();
                     }
                     break;
@@ -177,7 +191,7 @@ public class CreateTripDialogFragment extends DialogFragment implements View.OnC
     }
 
     public interface OnButtonClickListener {
-        void onPositiveButtonClick(FirebaseTrip firebaseTrip);
+        void onPositiveButtonClick(Trip trip, Vehicle vehicle);
 
         void onNegativeButtonClick();
     }

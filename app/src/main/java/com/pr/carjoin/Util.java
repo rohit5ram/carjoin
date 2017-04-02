@@ -10,6 +10,10 @@ public class Util {
     public static final String TAG = "com.letzpool";
     public static final String TRIPS = "trips";
     public static final String USERS = "users";
+    public static final String VEHICLES = "vehicles";
+    public static final String TRIP_SUMMARY = "tripSummary";
+    public static final String TRIP_QUEUE = "tripQueue";
+    public static final String SHARE = "share";
 
     public static void logException(Exception e, String logLabel) {
         Log.e(TAG, logLabel + " [[[ " + e.getMessage() + " ]]]");

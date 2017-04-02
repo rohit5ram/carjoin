@@ -21,11 +21,13 @@ import com.google.firebase.database.ValueEventListener;
 import com.pr.carjoin.R;
 import com.pr.carjoin.Util;
 import com.pr.carjoin.adapters.TripsRecyclerAdapter;
-import com.pr.carjoin.pojos.FirebaseTrip;
+import com.pr.carjoin.pojos.Trip;
+import com.pr.carjoin.pojos.TripQueue;
+import com.pr.carjoin.pojos.TripQueueMap;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Set;
 
 /**
  * Created by vishnu on 29/3/17.
@@ -33,34 +35,35 @@ import java.util.List;
 
 public class ListTripActivity extends AppCompatActivity {
     private static final String LOG_LABEL = "activities.ListTripActivity";
-    private DatabaseReference databaseReference;
+    private DatabaseReference tripsDatabaseReference, tripQueueDatabaseReference;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.list_trip_layout);
-        databaseReference = FirebaseDatabase.getInstance().getReference().child(Util.TRIPS);
+        tripsDatabaseReference = FirebaseDatabase.getInstance().getReference().child(Util.TRIPS);
+        tripQueueDatabaseReference = FirebaseDatabase.getInstance().getReference().child(Util.TRIP_QUEUE);
         findTrips();
     }
 
     private void findTrips() {
-        databaseReference.addValueEventListener(new ValueEventListener() {
+        tripsDatabaseReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                List<FirebaseTrip> tripsList = new ArrayList<>();
+                HashMap<String, Trip> tripHashMap = new HashMap<>();
                 Iterable<DataSnapshot> dataSnapshots = dataSnapshot.getChildren();
                 for (DataSnapshot child : dataSnapshots) {
                     FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
                     FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
-                    FirebaseTrip trip = child.getValue(FirebaseTrip.class);
+                    Trip trip = child.getValue(Trip.class);
                     if (firebaseUser != null && trip.published && !trip.started && !trip.completed
-                            && !trip.userDetails.id.equals(firebaseUser.getUid()) && trip.endDate > new Date().getTime()
-                            && trip.beginDate < trip.endDate) {
+                            && !trip.owner.id.equals(firebaseUser.getUid()) && trip.endDateTimeMills > new Date().getTime()
+                            && trip.beginDateTimeMills < trip.endDateTimeMills) {
                         trip.id = child.getKey();
-                        tripsList.add(trip);
+                        tripHashMap.put(trip.id, trip);
                     }
                 }
-                onComplete(this, tripsList);
+                onTripRequestComplete(this, tripHashMap);
             }
 
             @Override
@@ -70,14 +73,43 @@ public class ListTripActivity extends AppCompatActivity {
         });
     }
 
-    private void onComplete(ValueEventListener valueEventListener, List<FirebaseTrip> tripsList) {
-        databaseReference.removeEventListener(valueEventListener);
-        Log.i(Util.TAG, LOG_LABEL + " Filtered Trips Size :: " + tripsList.size());
+    private void onTripRequestComplete(ValueEventListener valueEventListener, final HashMap<String, Trip> tripHashMap) {
+        tripsDatabaseReference.removeEventListener(valueEventListener);
+        Log.i(Util.TAG, LOG_LABEL + " Filtered TripsDBModel Size :: " + tripHashMap.size());
+        final Set<String> tripIds = tripHashMap.keySet();
+
+        tripQueueDatabaseReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                HashMap<Trip, TripQueueMap> tripTripQueueMapHashMap = new HashMap<>();
+                Iterable<DataSnapshot> dataSnapshots = dataSnapshot.getChildren();
+                for (DataSnapshot children : dataSnapshots) {
+                    if (tripIds.contains(children.getKey())) {
+                        TripQueueMap tripQueueMap = new TripQueueMap();
+                        for (DataSnapshot child : children.getChildren()) {
+                            tripQueueMap.put(child.getKey(), child.getValue(TripQueue.class));
+                        }
+                        tripTripQueueMapHashMap.put(tripHashMap.get(children.getKey()), tripQueueMap);
+                    }
+                }
+                onReadComplete(this, tripTripQueueMapHashMap);
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private void onReadComplete(ValueEventListener valueEventListener, HashMap<Trip, TripQueueMap> tripTripQueueMapHashMap) {
+        tripQueueDatabaseReference.removeEventListener(valueEventListener);
         ProgressBar progressBar = (ProgressBar) findViewById(R.id.list_trip_layout_progressBar);
         progressBar.setVisibility(View.GONE);
-        if (tripsList.size() > 0) {
+        if (tripTripQueueMapHashMap.size() > 0) {
             RecyclerView recyclerView = (RecyclerView) findViewById(R.id.trips_list);
-            recyclerView.setAdapter(new TripsRecyclerAdapter(tripsList, this));
+            recyclerView.setAdapter(new TripsRecyclerAdapter(this, tripTripQueueMapHashMap));
             recyclerView.setLayoutManager(new LinearLayoutManager(this));
             recyclerView.setItemAnimator(new DefaultItemAnimator());
             recyclerView.setVisibility(View.VISIBLE);

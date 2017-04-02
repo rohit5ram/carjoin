@@ -12,9 +12,9 @@ import com.pr.carjoin.database.model.Commuters;
 import com.pr.carjoin.database.model.Fuel;
 import com.pr.carjoin.database.model.Ledger;
 import com.pr.carjoin.database.model.TripShare;
-import com.pr.carjoin.database.model.Trips;
-import com.pr.carjoin.database.model.Users;
-import com.pr.carjoin.database.model.Vehicle;
+import com.pr.carjoin.database.model.TripsDBModel;
+import com.pr.carjoin.database.model.UsersDBModel;
+import com.pr.carjoin.database.model.VehicleDBModel;
 
 /**
  * Created by rohit on 31/5/15.
@@ -56,10 +56,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             sqLiteDatabase.execSQL("DELETE FROM " + Commuters.TABLE_NAME);
             sqLiteDatabase.execSQL("DELETE FROM " + Fuel.TABLE_NAME);
             sqLiteDatabase.execSQL("DELETE FROM " + Ledger.TABLE_NAME);
-            sqLiteDatabase.execSQL("DELETE FROM " + Trips.TABLE_NAME);
+            sqLiteDatabase.execSQL("DELETE FROM " + TripsDBModel.TABLE_NAME);
             sqLiteDatabase.execSQL("DELETE FROM " + TripShare.TABLE_NAME);
-            sqLiteDatabase.execSQL("DELETE FROM " + Users.TABLE_NAME);
-            sqLiteDatabase.execSQL("DELETE FROM " + Vehicle.TABLE_NAME);
+            sqLiteDatabase.execSQL("DELETE FROM " + UsersDBModel.TABLE_NAME);
+            sqLiteDatabase.execSQL("DELETE FROM " + VehicleDBModel.TABLE_NAME);
             sqLiteDatabase.execSQL("VACUUM");
         } catch (Exception e) {
             Util.logException(e, LOG_LABEL);
@@ -75,19 +75,19 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + Commuters.TABLE_NAME);
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + Fuel.TABLE_NAME);
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + Ledger.TABLE_NAME);
-        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + Trips.TABLE_NAME);
+        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TripsDBModel.TABLE_NAME);
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TripShare.TABLE_NAME);
-        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + Users.TABLE_NAME);
-        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + Vehicle.TABLE_NAME);
+        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + UsersDBModel.TABLE_NAME);
+        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + VehicleDBModel.TABLE_NAME);
 
         sqLiteDatabase.execSQL(BalanceSheet.CREATE_TABLE);
         sqLiteDatabase.execSQL(Commuters.CREATE_TABLE);
         sqLiteDatabase.execSQL(Fuel.CREATE_TABLE);
         sqLiteDatabase.execSQL(Ledger.CREATE_TABLE);
-        sqLiteDatabase.execSQL(Trips.CREATE_TABLE);
+        sqLiteDatabase.execSQL(TripsDBModel.CREATE_TABLE);
         sqLiteDatabase.execSQL(TripShare.CREATE_TABLE);
-        sqLiteDatabase.execSQL(Users.CREATE_TABLE);
-        sqLiteDatabase.execSQL(Vehicle.CREATE_TABLE);
+        sqLiteDatabase.execSQL(UsersDBModel.CREATE_TABLE);
+        sqLiteDatabase.execSQL(VehicleDBModel.CREATE_TABLE);
     }
 
     @Override
@@ -108,19 +108,19 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + Commuters.TABLE_NAME);
             sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + Fuel.TABLE_NAME);
             sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + Ledger.TABLE_NAME);
-            sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + Trips.TABLE_NAME);
+            sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TripsDBModel.TABLE_NAME);
             sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TripShare.TABLE_NAME);
-            sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + Users.TABLE_NAME);
-            sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + Vehicle.TABLE_NAME);
+            sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + UsersDBModel.TABLE_NAME);
+            sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + VehicleDBModel.TABLE_NAME);
 
             sqLiteDatabase.execSQL(BalanceSheet.CREATE_TABLE);
             sqLiteDatabase.execSQL(Commuters.CREATE_TABLE);
             sqLiteDatabase.execSQL(Fuel.CREATE_TABLE);
             sqLiteDatabase.execSQL(Ledger.CREATE_TABLE);
-            sqLiteDatabase.execSQL(Trips.CREATE_TABLE);
+            sqLiteDatabase.execSQL(TripsDBModel.CREATE_TABLE);
             sqLiteDatabase.execSQL(TripShare.CREATE_TABLE);
-            sqLiteDatabase.execSQL(Users.CREATE_TABLE);
-            sqLiteDatabase.execSQL(Vehicle.CREATE_TABLE);
+            sqLiteDatabase.execSQL(UsersDBModel.CREATE_TABLE);
+            sqLiteDatabase.execSQL(VehicleDBModel.CREATE_TABLE);
             result = true;
         } catch (Exception e) {
             Util.logException(e, LOG_LABEL);

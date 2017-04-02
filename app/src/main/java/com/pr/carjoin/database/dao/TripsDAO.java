@@ -6,7 +6,7 @@ import android.database.sqlite.SQLiteDatabase;
 
 import com.pr.carjoin.Util;
 import com.pr.carjoin.database.DatabaseHelper;
-import com.pr.carjoin.database.model.Trips;
+import com.pr.carjoin.database.model.TripsDBModel;
 
 /**
  * Created by rohit on 13/6/15.
@@ -37,8 +37,8 @@ public class TripsDAO {
             final SQLiteDatabase db = dbHelper.getReadableDatabase();
 
             cursor = db.query(
-                    Trips.TABLE_NAME,
-                    Trips.FIELDS,
+                    TripsDBModel.TABLE_NAME,
+                    TripsDBModel.FIELDS,
                     null, null, null, null, null, null
             );
         } catch (Exception e) {
@@ -54,9 +54,9 @@ public class TripsDAO {
             final SQLiteDatabase db = dbHelper.getReadableDatabase();
 
             cursor = db.query(
-                    Trips.TABLE_NAME,
-                    Trips.FIELDS,
-                    Trips.COL_ID + " IS ? ",
+                    TripsDBModel.TABLE_NAME,
+                    TripsDBModel.FIELDS,
+                    TripsDBModel.COL_ID + " IS ? ",
                     new String[]{id},
                     null, null, null, null
             );
@@ -67,18 +67,18 @@ public class TripsDAO {
         return cursor;
     }
 
-    public synchronized boolean putTrips(final Trips trips) {
+    public synchronized boolean putTrips(final TripsDBModel tripsDBModel) {
         boolean success = false;
         int result = 0;
         try {
             final SQLiteDatabase db = dbHelper.getWritableDatabase();
 
-            if (trips.id != null) {
+            if (tripsDBModel.id != null) {
                 result += db.update(
-                        Trips.TABLE_NAME,
-                        trips.getContent(),
-                        Trips.COL_ID + " IS ? ",
-                        new String[]{trips.id}
+                        TripsDBModel.TABLE_NAME,
+                        tripsDBModel.getContent(),
+                        TripsDBModel.COL_ID + " IS ? ",
+                        new String[]{tripsDBModel.id}
                 );
             }
 
@@ -86,9 +86,9 @@ public class TripsDAO {
                 success = true;
             } else {
                 final long rowId = db.insert(
-                        Trips.TABLE_NAME,
+                        TripsDBModel.TABLE_NAME,
                         null,
-                        trips.getContent()
+                        tripsDBModel.getContent()
                 );
 
                 if (rowId > -1) {
@@ -107,8 +107,8 @@ public class TripsDAO {
         Cursor tripsCursor = getTripsCursor();
         try {
             if (tripsCursor != null && tripsCursor.moveToLast()) {
-                Trips trips = new Trips(tripsCursor);
-                tripsId = trips.id;
+                TripsDBModel tripsDBModel = new TripsDBModel(tripsCursor);
+                tripsId = tripsDBModel.id;
             }
         } catch (Exception e) {
             Util.logException(e, LOG_LABEL);
@@ -124,12 +124,12 @@ public class TripsDAO {
         return tripsId;
     }
 
-    public synchronized Trips getTrips() {
+    public synchronized TripsDBModel getTrips() {
         Cursor tripsCursor = getTripsCursor();
-        Trips trips = null;
+        TripsDBModel tripsDBModel = null;
         try {
             if (tripsCursor != null && tripsCursor.moveToLast()) {
-                trips = new Trips(tripsCursor);
+                tripsDBModel = new TripsDBModel(tripsCursor);
             }
         } catch (Exception e) {
             Util.logException(e, LOG_LABEL);
@@ -142,17 +142,17 @@ public class TripsDAO {
                 Util.logException(e, LOG_LABEL);
             }
         }
-        return trips;
+        return tripsDBModel;
     }
 
-    public synchronized boolean deleteTrips(Trips trips) {
+    public synchronized boolean deleteTrips(TripsDBModel tripsDBModel) {
         int result = -1;
         try {
             final SQLiteDatabase db = dbHelper.getWritableDatabase();
             result = db.delete(
-                    Trips.TABLE_NAME,
-                    Trips.COL_ID + " IS ? ",
-                    new String[]{String.valueOf(trips.id)}
+                    TripsDBModel.TABLE_NAME,
+                    TripsDBModel.COL_ID + " IS ? ",
+                    new String[]{String.valueOf(tripsDBModel.id)}
             );
         } catch (Exception e) {
             Util.logException(e, LOG_LABEL);
@@ -171,7 +171,7 @@ public class TripsDAO {
             final SQLiteDatabase db = dbHelper.getReadableDatabase();
 
             cursor = db.query(
-                    Trips.TABLE_NAME,
+                    TripsDBModel.TABLE_NAME,
                     projection,
                     selection, selectionArgs, null, null, sortOrder, null
             );

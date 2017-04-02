@@ -45,6 +45,7 @@
     <string name="string_fuel_price">Fuel Price</string>
     <string name="string_maintenance_per">Maintenance Per</string>
     <string name="string_seats_available">Seats Available</string>
+    <string name="string_vehicle_type">Vehicle Type</string>
     <string name="string_create">Create</string>
     <string name="string_cancel">Cancel</string>
     <string name="string_request">Request</string>

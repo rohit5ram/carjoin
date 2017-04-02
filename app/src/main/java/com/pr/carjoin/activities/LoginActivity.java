@@ -27,9 +27,10 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.iid.FirebaseInstanceId;
 import com.pr.carjoin.R;
 import com.pr.carjoin.Util;
-import com.pr.carjoin.pojos.UserDetails;
+import com.pr.carjoin.pojos.User;
 
 /**
  * Created by rohit on 14/6/15.
@@ -50,7 +51,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private FirebaseAuth mAuth;
     private GoogleApiClient mGoogleApiClient;
 
-    /* Request code used to invoke sign in user interactions. */
+    /* TripQueue code used to invoke sign in user interactions. */
     private static final int RC_SIGN_IN = 9001;
 
 
@@ -171,7 +172,12 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                         } else {
                             DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference(Util.USERS);
                             FirebaseUser firebaseUser = task.getResult().getUser();
-                            databaseReference.child(firebaseUser.getUid()).setValue(new UserDetails(firebaseUser));
+                            User user = new User();
+                            user.name = firebaseUser.getDisplayName();
+                            user.email = firebaseUser.getEmail();
+                            user.photoUrl = String.valueOf(firebaseUser.getPhotoUrl());
+                            user.fcmRegistrationToken = FirebaseInstanceId.getInstance().getToken();
+                            databaseReference.child(firebaseUser.getUid()).setValue(user);
                         }
                         // [START_EXCLUDE]
                         hideProgressDialog();

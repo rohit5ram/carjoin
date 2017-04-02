@@ -9,8 +9,8 @@ import java.util.UUID;
 /**
  * Created by rohit on 13/6/15.
  */
-public class Vehicle {
-    public static final String TABLE_NAME = "Vehicle";
+public class VehicleDBModel {
+    public static final String TABLE_NAME = "VehicleDBModel";
 
     public static final String COL_ID = "ID";
     public static final String COL_NAME = "NAME";
@@ -49,7 +49,7 @@ public class Vehicle {
     public double mileage = -1;
     public long lastModified = -1;
 
-    public Vehicle(Cursor cursor) {
+    public VehicleDBModel(Cursor cursor) {
         this.id = cursor.getString(0);
         this.name = cursor.getString(1);
         this.manufacturer = cursor.getString(2);
