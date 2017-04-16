@@ -11,7 +11,6 @@ public class Trip {
 
     public String id;
     public long beginDateTimeMills;
-    public boolean completed;
     public String destAddress;
     public double destLat;
     public double destLong;
@@ -22,11 +21,11 @@ public class Trip {
     public String sourceAddress;
     public double sourceLat;
     public double sourceLong;
-    public boolean started;
     public int seatsAvailable;
     public long timeStamp;
     public String vehicleRegId;
     public Owner owner;
+    public String status;
     public ArrayList<String> members;
 
     public static class Owner {

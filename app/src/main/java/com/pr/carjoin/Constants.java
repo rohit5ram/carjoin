@@ -14,4 +14,10 @@ public class Constants {
     //TripQueue commuterType
     public static final String OWNER = "owner";
     public static final String COMMUTER = "commuter";
+
+    //TripStatus
+    public static final String CREATED = "CREATED";
+    public static final String STARTED = "STARTED";
+    public static final String CANCELLED = "CANCELLED";
+    public static final String STOPPED = "STOPPED";
 }

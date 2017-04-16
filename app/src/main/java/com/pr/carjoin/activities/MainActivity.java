@@ -521,8 +521,7 @@ public class MainActivity extends AppCompatActivity
             trip.owner.name = firebaseUser.getDisplayName();
             trip.owner.email = firebaseUser.getEmail();
             trip.owner.photoURL = String.valueOf(firebaseUser.getPhotoUrl());
-            trip.started = false;
-            trip.completed = false;
+            trip.status = Constants.CREATED;
             DatabaseReference database = FirebaseDatabase.getInstance().getReference().child(Util.TRIPS).push();
             final String tripId = database.getKey();
             database.setValue(trip).addOnCompleteListener(this, new OnCompleteListener<Void>() {

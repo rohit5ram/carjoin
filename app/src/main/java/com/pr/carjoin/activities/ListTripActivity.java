@@ -18,6 +18,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.pr.carjoin.Constants;
 import com.pr.carjoin.R;
 import com.pr.carjoin.Util;
 import com.pr.carjoin.adapters.TripsRecyclerAdapter;
@@ -56,7 +57,7 @@ public class ListTripActivity extends AppCompatActivity {
                     FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
                     FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
                     Trip trip = child.getValue(Trip.class);
-                    if (firebaseUser != null && trip.published && !trip.started && !trip.completed
+                    if (firebaseUser != null && trip.published && trip.status.equals(Constants.CREATED)
                             && !trip.owner.id.equals(firebaseUser.getUid()) && trip.endDateTimeMills > new Date().getTime()
                             && trip.beginDateTimeMills < trip.endDateTimeMills) {
                         trip.id = child.getKey();
