@@ -146,7 +146,7 @@ public class CreateTripDialogFragment extends DialogFragment implements View.OnC
         trip.endDateTimeMills = endDateTimeInMills;
         trip.fuelPricePerLitre = Double.parseDouble(fuelPrice.getText().toString());
         trip.maintenancePercentage = Double.parseDouble(maintenancePer.getText().toString());
-        trip.vehicleRegId = vehicleNumber.getText().toString();
+        trip.vehicleRegId = vehicleNumber.getText().toString().toUpperCase();
         trip.seatsAvailable = Integer.parseInt(seats.getText().toString());
         return trip;
     }

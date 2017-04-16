@@ -85,6 +85,7 @@
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
             android:background="@drawable/edit_text_border"
+            android:digits="abcdefghijklmnopqrstuvwxyz1234567890"
             android:hint="@string/string_vehicle_number"
             android:textSize="28sp" />
 
