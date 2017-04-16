@@ -61,4 +61,5 @@
     <string name="string_send">send</string>
     <string name="string_create_trip">Create Trip</string>
     <string name="string_find_trip">Find Trip</string>
+    <string name="string_mileage">Mileage</string>
 </resources>

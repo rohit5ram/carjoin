@@ -32,7 +32,7 @@ public class CreateTripDialogFragment extends DialogFragment implements View.OnC
     private static final String LOG_LABEL = "customViews.CreateTripDialogFragment";
     private TextView startTime, endTime, startDate, endDate;
     private EditText vehicleName, vehicleNumber, vehicleColor, fuelPrice,
-            maintenancePer, seats, vehicleType;
+            maintenancePer, seats, vehicleType, mileage;
     private OnButtonClickListener onButtonClickListener;
     private long startDateTimeInMills = 0, endDateTimeInMills = 0;
 
@@ -66,6 +66,7 @@ public class CreateTripDialogFragment extends DialogFragment implements View.OnC
         vehicleColor = (EditText) rootView.findViewById(R.id.vehicle_color);
         fuelPrice = (EditText) rootView.findViewById(R.id.fuel_price);
         maintenancePer = (EditText) rootView.findViewById(R.id.maintenance_per);
+        mileage = (EditText) rootView.findViewById(R.id.mileage);
         seats = (EditText) rootView.findViewById(R.id.seats_available);
         vehicleType = (EditText) rootView.findViewById(R.id.vehicle_type);
 
@@ -157,6 +158,7 @@ public class CreateTripDialogFragment extends DialogFragment implements View.OnC
         vehicle.name = vehicleName.getText().toString();
         vehicle.type = vehicleType.getText().toString();
         vehicle.owner = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        vehicle.mileage = Double.parseDouble(mileage.getText().toString());
         return vehicle;
     }
 

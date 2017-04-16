@@ -9,6 +9,7 @@ public class Vehicle {
     public String name;
     public String type;
     public String owner;
+    public double mileage;
 
     public Vehicle() {
     }
