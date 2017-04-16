@@ -14,6 +14,8 @@ public class Util {
     public static final String TRIP_SUMMARY = "tripSummary";
     public static final String TRIP_QUEUE = "tripQueue";
     public static final String SHARE = "share";
+    public static final String OPERATION_CODE = "operationCode";
+    public static final String REF_PATH = "refPath";
 
     public static void logException(Exception e, String logLabel) {
         Log.e(TAG, logLabel + " [[[ " + e.getMessage() + " ]]]");

@@ -26,8 +26,13 @@ import android.util.Log;
 
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
+import com.pr.carjoin.Constants;
+import com.pr.carjoin.NotificationReceiver;
 import com.pr.carjoin.R;
+import com.pr.carjoin.Util;
 import com.pr.carjoin.activities.MainActivity;
+
+import java.util.Map;
 
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
@@ -40,9 +45,11 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         Log.d(TAG, "FCM Notification Message: " + remoteMessage.getNotification());
         Log.d(TAG, "FCM Data Message: " + remoteMessage.getData());
 
-        if(remoteMessage.getNotification() != null){
-            sendNotification(remoteMessage.getNotification().getBody());
-        }else{
+        if (remoteMessage.getData() != null && remoteMessage.getNotification() != null &&
+                remoteMessage.getData().size() > 0) {
+            showNotification(remoteMessage.getData(), remoteMessage.getNotification().getBody());
+//            sendNotification(remoteMessage.getNotification().getBody());
+        } else {
             sendNotification("");
         }
     }
@@ -68,5 +75,52 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
         notificationManager.notify(0, notificationBuilder.build());
+    }
+
+    private void showNotification(Map<String, String> payLoad, String messageBody) {
+        String operationCode = payLoad.get(Util.OPERATION_CODE);
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent,
+                PendingIntent.FLAG_ONE_SHOT);
+        Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setContentTitle("CarJoin")
+                .setAutoCancel(true)
+                .setContentText(messageBody)
+                .setSound(defaultSoundUri)
+                .setContentIntent(pendingIntent);
+
+        NotificationManager notificationManager =
+                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+        switch (operationCode) {
+            case "5000":
+                Intent acceptedIntent = new Intent(this, NotificationReceiver.class);
+                Intent declinedIntent = new Intent(this, NotificationReceiver.class);
+                acceptedIntent.setAction(Constants.ACCEPTED);
+                acceptedIntent.putExtra("actionCode", "5000");
+                acceptedIntent.putExtra(Util.REF_PATH, payLoad.get(Util.REF_PATH));
+                acceptedIntent.putExtra("valueToUpdate", Constants.ACCEPTED);
+
+                PendingIntent acceptPendingIntent = PendingIntent.getBroadcast(this, 0,
+                        acceptedIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+                declinedIntent.setAction(Constants.REJECTED);
+                declinedIntent.putExtra("actionCode", "5000");
+                declinedIntent.putExtra(Util.REF_PATH, payLoad.get(Util.REF_PATH));
+                declinedIntent.putExtra("valueToUpdate", Constants.REJECTED);
+
+                PendingIntent declinePendingIntent = PendingIntent.getBroadcast(this, 0,
+                        declinedIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+                notificationBuilder.addAction(R.drawable.decline, "Decline", declinePendingIntent);
+                notificationBuilder.addAction(R.drawable.accept, "Accept", acceptPendingIntent);
+                notificationManager.notify(5000, notificationBuilder.build());
+                break;
+        }
+
     }
 }

@@ -423,6 +423,11 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+    }
+
+    @Override
     public void onLocationChanged(Location location) {
         Log.i(Util.TAG, LOG_LABEL + " location of the device is changed");
         userCurrentLocation = location;
