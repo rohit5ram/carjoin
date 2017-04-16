@@ -1,5 +1,7 @@
 package com.pr.carjoin.pojos;
 
+import java.util.ArrayList;
+
 /**
  * Created by vishnu on 28/3/17.
  */
@@ -25,7 +27,7 @@ public class Trip {
     public long timeStamp;
     public String vehicleRegId;
     public Owner owner;
-    public String[] members;
+    public ArrayList<String> members;
 
     public static class Owner {
         public String id;
