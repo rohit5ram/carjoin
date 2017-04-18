@@ -164,7 +164,8 @@ public class MainActivity extends AppCompatActivity
                     FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
                     // should remove the vishnu@yantranet.com
                     if (firebaseUser != null && firebaseUser.getEmail() != null) {
-                        if (firebaseUser.getEmail().equals("rohit5ram@gmail.com"))
+                        if (firebaseUser.getEmail().equals("rohit5ram@gmail.com")
+                                || firebaseUser.getEmail().equals("vishnu@yantranet.com"))
                             createTripButton.setVisibility(View.VISIBLE);
                         else findTripButton.setVisibility(View.VISIBLE);
                     }
@@ -251,6 +252,9 @@ public class MainActivity extends AppCompatActivity
 
         } else if (id == R.id.nav_send) {
             Intent intent = new Intent(MainActivity.this, ChatMainActivity.class);
+            startActivity(intent);
+        }else if(id == R.id.nav_my_trip){
+            Intent intent = new Intent(MainActivity.this, MyTripsActivity.class);
             startActivity(intent);
         }
 
@@ -425,6 +429,12 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
+        String operationCode = intent.getStringExtra(Util.OPERATION_CODE);
+        switch (operationCode){
+            case "5000":
+
+                break;
+        }
     }
 
     @Override

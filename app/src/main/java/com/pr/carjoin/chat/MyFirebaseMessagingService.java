@@ -80,9 +80,11 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     private void showNotification(Map<String, String> payLoad, String messageBody) {
         String operationCode = payLoad.get(Util.OPERATION_CODE);
         Intent intent = new Intent(this, MainActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        intent.putExtra(Util.OPERATION_CODE, payLoad.get(Util.OPERATION_CODE));
+        intent.putExtra(Util.REF_PATH, payLoad.get(Util.REF_PATH));
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent,
-                PendingIntent.FLAG_ONE_SHOT);
+                PendingIntent.FLAG_UPDATE_CURRENT);
         Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
 
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)
