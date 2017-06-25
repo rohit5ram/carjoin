@@ -253,7 +253,7 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.nav_send) {
             Intent intent = new Intent(MainActivity.this, ChatMainActivity.class);
             startActivity(intent);
-        }else if(id == R.id.nav_my_trip){
+        } else if (id == R.id.nav_my_trip) {
             Intent intent = new Intent(MainActivity.this, MyTripsActivity.class);
             startActivity(intent);
         }
@@ -430,7 +430,7 @@ public class MainActivity extends AppCompatActivity
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         String operationCode = intent.getStringExtra(Util.OPERATION_CODE);
-        switch (operationCode){
+        switch (operationCode) {
             case "5000":
 
                 break;
@@ -464,7 +464,7 @@ public class MainActivity extends AppCompatActivity
         try {
             startActivityForResult(builder.build(this), requestCode);
         } catch (GooglePlayServicesRepairableException | GooglePlayServicesNotAvailableException e) {
-            e.printStackTrace();
+            Log.e(Util.TAG, LOG_LABEL + e.getMessage());
         }
     }
 
@@ -488,7 +488,7 @@ public class MainActivity extends AppCompatActivity
                         break;
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                Log.e(Util.TAG, LOG_LABEL + e.getMessage());
             }
         }
     }
