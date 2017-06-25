@@ -7,7 +7,7 @@ import android.util.Log;
  * Created by rohit on 31/5/15.
  */
 public class Util {
-    public static final String TAG = "com.letzpool";
+    public static final String TAG = "com.carjoin";
     public static final String TRIPS = "trips";
     public static final String USERS = "users";
     public static final String VEHICLES = "vehicles";
