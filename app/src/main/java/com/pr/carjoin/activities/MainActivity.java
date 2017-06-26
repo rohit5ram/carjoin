@@ -497,7 +497,9 @@ public class MainActivity extends AppCompatActivity
                 if (resultCode == RESULT_OK) {
                     Place selectedPlace = PlacePicker.getPlace(this, data);
                     pickUpLatLng = selectedPlace.getLatLng();
-                    pickLocationAddressView.setText(Util.getAddressAsString(getAddresses(selectedPlace).get(0)));
+                    List<Address> addresses = getAddresses(selectedPlace);
+                    if (!addresses.isEmpty())
+                        pickLocationAddressView.setText(Util.getAddressAsString(addresses.get(0)));
                     showDestinationLayout();
                 } else {
                     // Sending failed or it was canceled, show failure message to the user
@@ -508,7 +510,9 @@ public class MainActivity extends AppCompatActivity
                 if (resultCode == RESULT_OK) {
                     Place selectedPlace = PlacePicker.getPlace(this, data);
                     destLatLng = selectedPlace.getLatLng();
-                    destinationAddressView.setText(Util.getAddressAsString(getAddresses(selectedPlace).get(0)));
+                    List<Address> addresses = getAddresses(selectedPlace);
+                    if (!addresses.isEmpty())
+                        destinationAddressView.setText(Util.getAddressAsString(addresses.get(0)));
                 } else {
                     // Sending failed or it was canceled, show failure message to the user
                     Log.d(Util.TAG, "Failed to determine destination location");
