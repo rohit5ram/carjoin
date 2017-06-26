@@ -24,6 +24,9 @@ android {
         }
     }
     buildTypes {
+        debug {
+            versionNameSuffix "-DEBUG"
+        }
         release {
             shrinkResources false
             minifyEnabled false
