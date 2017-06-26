@@ -139,7 +139,7 @@ public class TripsRecyclerAdapter extends RecyclerView.Adapter<TripsRecyclerAdap
             super(itemView);
 
             imageView = (CircleImageView) itemView.findViewById(R.id.user_photo);
-            request = (Button) itemView.findViewById(R.id.request_button);
+            request = (Button) itemView.findViewById(R.id.status);
             userName = (TextView) itemView.findViewById(R.id.user_name);
             startDate = (TextView) itemView.findViewById(R.id.start_date_text_view);
             endDate = (TextView) itemView.findViewById(R.id.end_date_text_view);

@@ -35,26 +35,26 @@ public class MyTripsRecyclerAdapter extends FirebaseRecyclerAdapter<Trip, MyTrip
                 .format(new Date(trip.beginDateTimeMills)));
         tripHolder.getEndDate().append("   : " + new SimpleDateFormat(DATE_TIME_FORMAT, Locale.getDefault())
                 .format(new Date(trip.endDateTimeMills)));
+        tripHolder.getStatus().setText(trip.status);
     }
 
     public static class TripHolder extends RecyclerView.ViewHolder {
 
-        private Button positive, negative;
+        private Button status;
         private TextView source, startDate, endDate, destination;
 
         public TripHolder(View itemView) {
             super(itemView);
 
-            positive = (Button) itemView.findViewById(R.id.request_button);
-            negative = (Button) itemView.findViewById(R.id.ignore_button);
+            status = (Button) itemView.findViewById(R.id.status);
             source = (TextView) itemView.findViewById(R.id.source_address);
             startDate = (TextView) itemView.findViewById(R.id.start_date_text_view);
             endDate = (TextView) itemView.findViewById(R.id.end_date_text_view);
             destination = (TextView) itemView.findViewById(R.id.destination_address);
         }
 
-        public Button getPositive() {
-            return positive;
+        public Button getStatus() {
+            return status;
         }
 
         public TextView getSource() {
@@ -71,10 +71,6 @@ public class MyTripsRecyclerAdapter extends FirebaseRecyclerAdapter<Trip, MyTrip
 
         public TextView getDestination() {
             return destination;
-        }
-
-        public Button getNegative() {
-            return negative;
         }
     }
 }

@@ -85,7 +85,7 @@
                 android:textColor="#EF5350" />-->
 
             <Button
-                android:id="@+id/request_button"
+                android:id="@+id/status"
                 style="@style/Widget.AppCompat.Button.Borderless"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
