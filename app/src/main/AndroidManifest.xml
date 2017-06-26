@@ -55,7 +55,9 @@
             android:theme="@style/AppTheme"
             android:windowSoftInputMode="stateHidden" />
         <activity android:name=".activities.ListTripActivity" />
-        <activity android:name=".activities.MyTripsActivity" />
+        <activity
+            android:name=".activities.YourTripsActivity"
+            android:theme="@style/AppTheme.NoActionBar" />
 
         <service
             android:name=".chat.MyFirebaseMessagingService"

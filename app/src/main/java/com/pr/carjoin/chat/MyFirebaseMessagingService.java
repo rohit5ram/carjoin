@@ -31,7 +31,7 @@ import com.pr.carjoin.NotificationReceiver;
 import com.pr.carjoin.R;
 import com.pr.carjoin.Util;
 import com.pr.carjoin.activities.MainActivity;
-import com.pr.carjoin.activities.MyTripsActivity;
+import com.pr.carjoin.activities.YourTripsActivity;
 
 import java.util.Map;
 
@@ -80,7 +80,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
     private void showNotification(Map<String, String> payLoad, String messageBody) {
         String operationCode = payLoad.get(Util.OPERATION_CODE);
-        Intent intent = new Intent(this, MyTripsActivity.class);
+        Intent intent = new Intent(this, YourTripsActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         intent.putExtra(Util.OPERATION_CODE, payLoad.get(Util.OPERATION_CODE));
         intent.putExtra(Util.REF_PATH, payLoad.get(Util.REF_PATH));

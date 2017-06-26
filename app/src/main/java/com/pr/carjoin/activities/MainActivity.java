@@ -32,6 +32,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.google.android.gms.appinvite.AppInviteInvitation;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
@@ -66,6 +67,7 @@ import com.pr.carjoin.pojos.TripQueue;
 import com.pr.carjoin.pojos.Vehicle;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -76,6 +78,15 @@ public class MainActivity extends AppCompatActivity
         LocationListener, GoogleMap.OnMarkerClickListener, GoogleMap.OnInfoWindowClickListener,
         CreateTripDialogFragment.OnButtonClickListener {
     private static final String LOG_LABEL = "activities.MainActivity";
+    /**
+     * TripQueue code for location permission request.
+     *
+     * @see #onRequestPermissionsResult(int, String[], int[])
+     */
+    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
+    private static final int REQUEST_INVITE = 2;
+    private static final int PICK_UP_PLACE_PICKER_REQUEST_CODE = 3;
+    private static final int DESTINATION_PLACE_PICKER_REQUEST_CODE = 4;
     private FirebaseUser firebaseUser;
     private GoogleMap mMap;
     private LocationRequest locationRequest;
@@ -97,21 +108,11 @@ public class MainActivity extends AppCompatActivity
     };
     private LatLng pickUpLatLng, destLatLng;
     private Location userCurrentLocation;
-
-    /**
-     * TripQueue code for location permission request.
-     *
-     * @see #onRequestPermissionsResult(int, String[], int[])
-     */
-    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
-
     /**
      * Flag indicating whether a requested permission has been denied after returning in
      * {@link #onRequestPermissionsResult(int, String[], int[])}.
      */
     private boolean mPermissionDenied = false;
-    private static final int PICK_UP_PLACE_PICKER_REQUEST_CODE = 1;
-    private static final int DESTINATION_PLACE_PICKER_REQUEST_CODE = 2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -163,7 +164,7 @@ public class MainActivity extends AppCompatActivity
                 if (editable.length() > 0) {
                     FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
                     // should remove the vishnu@yantranet.com
-                    if (firebaseUser != null && firebaseUser.getEmail() != null) {
+                    if (isSignedIn() && firebaseUser.getEmail() != null) {
                         if (firebaseUser.getEmail().equals("rohit5ram@gmail.com")
                                 || firebaseUser.getEmail().equals("vishnu@yantranet.com"))
                             createTripButton.setVisibility(View.VISIBLE);
@@ -226,6 +227,14 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
+    private void sendInvitation() {
+        Intent intent = new AppInviteInvitation.IntentBuilder(getString(R.string.invitation_title))
+                .setMessage(getString(R.string.invitation_message))
+                .setCallToActionText(getString(R.string.invitation_cta))
+                .build();
+        startActivityForResult(intent, REQUEST_INVITE);
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
@@ -243,18 +252,16 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_payment) {
-            // Handle the camera action
-        } else if (id == R.id.nav_history) {
-
+            Toast.makeText(this, "Coming soon...", Toast.LENGTH_LONG).show();
         } else if (id == R.id.nav_manage) {
-
+            Toast.makeText(this, "Coming soon...", Toast.LENGTH_LONG).show();
         } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
+            sendInvitation();
+        } else if (id == R.id.nav_chat) {
             Intent intent = new Intent(MainActivity.this, ChatMainActivity.class);
             startActivity(intent);
-        } else if (id == R.id.nav_my_trip) {
-            Intent intent = new Intent(MainActivity.this, MyTripsActivity.class);
+        } else if (id == R.id.nav_your_trips) {
+            Intent intent = new Intent(MainActivity.this, YourTripsActivity.class);
             startActivity(intent);
         }
 
@@ -297,7 +304,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void setNavHeader(View headerView) {
-        if (firebaseUser != null) {
+        if (isSignedIn()) {
             ImageView imageView = (ImageView) headerView.findViewById(R.id.nav_header_imageView);
             Glide.with(this).load(firebaseUser.getPhotoUrl()).into(imageView);
 
@@ -307,6 +314,10 @@ public class MainActivity extends AppCompatActivity
             TextView emailView = (TextView) headerView.findViewById(R.id.nav_header_sub_title);
             emailView.setText(firebaseUser.getEmail());
         }
+    }
+
+    private boolean isSignedIn() {
+        return firebaseUser != null;
     }
 
     /**
@@ -471,26 +482,40 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode == RESULT_OK) {
-            Place selectedPlace = PlacePicker.getPlace(this, data);
-            try {
-                List<Address> addresses = geocoder.getFromLocation(selectedPlace.getLatLng().latitude,
-                        selectedPlace.getLatLng().longitude, 1);
-                switch (requestCode) {
-                    case PICK_UP_PLACE_PICKER_REQUEST_CODE:
-                        pickUpLatLng = selectedPlace.getLatLng();
-                        pickLocationAddressView.setText(Util.getAddressAsString(addresses.get(0)));
-                        showDestinationLayout();
-                        break;
-                    case DESTINATION_PLACE_PICKER_REQUEST_CODE:
-                        destLatLng = selectedPlace.getLatLng();
-                        destinationAddressView.setText(Util.getAddressAsString(addresses.get(0)));
-                        break;
+        switch (requestCode) {
+            case REQUEST_INVITE:
+                if (resultCode == RESULT_OK) {
+                    // Check how many invitations were sent and log.
+                    String[] ids = AppInviteInvitation.getInvitationIds(resultCode, data);
+                    Log.d(Util.TAG, "Invitations sent: " + ids.length);
+                } else {
+                    // Sending failed or it was canceled, show failure message to the user
+                    Log.d(Util.TAG, "Failed to send invitation.");
                 }
-            } catch (IOException e) {
-                Log.e(Util.TAG, LOG_LABEL + e.getMessage());
-            }
+                break;
+            case PICK_UP_PLACE_PICKER_REQUEST_CODE:
+                if (resultCode == RESULT_OK) {
+                    Place selectedPlace = PlacePicker.getPlace(this, data);
+                    pickUpLatLng = selectedPlace.getLatLng();
+                    pickLocationAddressView.setText(Util.getAddressAsString(getAddresses(selectedPlace).get(0)));
+                    showDestinationLayout();
+                } else {
+                    // Sending failed or it was canceled, show failure message to the user
+                    Log.d(Util.TAG, "Failed to determine pick up location");
+                }
+                break;
+            case DESTINATION_PLACE_PICKER_REQUEST_CODE:
+                if (resultCode == RESULT_OK) {
+                    Place selectedPlace = PlacePicker.getPlace(this, data);
+                    destLatLng = selectedPlace.getLatLng();
+                    destinationAddressView.setText(Util.getAddressAsString(getAddresses(selectedPlace).get(0)));
+                } else {
+                    // Sending failed or it was canceled, show failure message to the user
+                    Log.d(Util.TAG, "Failed to determine destination location");
+                }
+                break;
         }
+
     }
 
     private boolean validSourceDestination() {
@@ -517,7 +542,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void createTrip(Trip trip) {
-        if (firebaseUser != null) {
+        if (isSignedIn()) {
             trip.published = true;
             trip.sourceLat = pickUpLatLng.latitude;
             trip.sourceLong = pickUpLatLng.longitude;
@@ -579,5 +604,16 @@ public class MainActivity extends AppCompatActivity
     private void launchListTripActivity() {
         Intent intent = new Intent(this, ListTripActivity.class);
         startActivity(intent);
+    }
+
+    public List<Address> getAddresses(Place selectedPlace) {
+        List<Address> addresses = new ArrayList<>();
+        try {
+            addresses = geocoder.getFromLocation(selectedPlace.getLatLng().latitude,
+                    selectedPlace.getLatLng().longitude, 1);
+        } catch (NullPointerException | IOException e) {
+            Log.e(Util.TAG, LOG_LABEL + e.getMessage());
+        }
+        return addresses;
     }
 }
