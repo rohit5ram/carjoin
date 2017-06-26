@@ -8,8 +8,8 @@ android {
         applicationId "com.pr.carjoin"
         minSdkVersion 21
         targetSdkVersion 25
-        versionCode 1
-        versionName "1.0"
+        versionCode buildVersionCode()
+        versionName version
         vectorDrawables.useSupportLibrary = true
     }
     signingConfigs {
@@ -30,6 +30,10 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release
             zipAlignEnabled true
+        }
+        dummy {
+            initWith release
+            versionNameSuffix "-DUMMY"
         }
     }
 }
@@ -69,3 +73,4 @@ dependencies {
     compile 'com.google.guava:guava:22.0-android'
 }
 apply plugin: 'com.google.gms.google-services'
+apply from: "../artifacts.gradle"

@@ -1,0 +1,33 @@
+android.applicationVariants.all { variant ->
+    def flavor = variant.mergedFlavor
+    flavor.versionCode = buildVersionCode(variant)
+
+    def appName
+    //Check if an applicationName property is supplied; if not use the name of the parent project.
+    if (project.hasProperty("applicationName")) {
+        appName = applicationName
+    } else {
+        appName = parent.name
+    }
+
+    variant.outputs.each { output ->
+        def newApkName
+        //new android gradle plugin 2.2.0 have default packaging pipeline which handles
+        // zipping, signing, and zipaligning in one task.So output.zipAlign is never true
+//        if (output.zipAlign) {
+        newApkName = "${appName}-${variant.versionName}.${variant.versionCode}.apk"
+//        } else {
+//            newApkName = "${appName}-${variant.versionName}.${variant.versionCode}-unaligned.apk"
+//        }
+        output.outputFile = new File(output.outputFile.parent, newApkName)
+    }
+}
+
+//bump versionCode by 1 for dummy build
+static def buildVersionCode(variant) {
+    def versionCode = variant.mergedFlavor.versionCode
+    if (variant.buildType.name == "dummy") {
+        versionCode += 1
+    }
+    versionCode
+}
