@@ -296,7 +296,7 @@ public class MainActivity extends AppCompatActivity
                         pickLocationAddressView.setText(Util.getAddressAsString(addressList.get(0)));
                     }
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    Log.e(Util.TAG, LOG_LABEL + e.getMessage());
                 }
             }
         });

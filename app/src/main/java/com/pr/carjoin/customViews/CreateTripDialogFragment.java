@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +15,7 @@ import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.pr.carjoin.R;
+import com.pr.carjoin.Util;
 import com.pr.carjoin.pojos.Trip;
 import com.pr.carjoin.pojos.Vehicle;
 
@@ -80,34 +82,25 @@ public class CreateTripDialogFragment extends DialogFragment implements View.OnC
     private boolean validateDetails() {
         try {
             //startDateTime
-            DateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
-            Calendar startDateTime = Calendar.getInstance();
-            startDateTime.setTime(format.parse(String.valueOf(startDate.getText())));
-            format = new SimpleDateFormat("HH:mm", Locale.ENGLISH);
-            Calendar startTimeAsCalender = Calendar.getInstance();
-            startTimeAsCalender.setTime(format.parse(String.valueOf(startTime.getText())));
-            startDateTime.set(Calendar.HOUR_OF_DAY, startTimeAsCalender.get(Calendar.HOUR_OF_DAY));
-            startDateTime.set(Calendar.MINUTE, startTimeAsCalender.get(Calendar.MINUTE));
-            startDateTimeInMills = startDateTime.getTimeInMillis();
+            DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.ENGLISH);
+            Calendar calendar = Calendar.getInstance();
+            String selectedDateTime = String.valueOf(startDate.getText()).concat(" ")
+                    .concat(String.valueOf(startTime.getText()));
+            calendar.setTime(format.parse(selectedDateTime));
+            startDateTimeInMills = calendar.getTimeInMillis();
 
             //endDateTime
-            format = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
-            Calendar endDateTime = Calendar.getInstance();
-            startDateTime.setTime(format.parse(String.valueOf(endDate.getText())));
-            format = new SimpleDateFormat("HH:mm", Locale.ENGLISH);
-            Calendar endTimeAsCalender = Calendar.getInstance();
-            endTimeAsCalender.setTime(format.parse(String.valueOf(endTime.getText())));
-            endDateTime.set(Calendar.HOUR_OF_DAY, endTimeAsCalender.get(Calendar.HOUR_OF_DAY));
-            endDateTime.set(Calendar.MINUTE, endTimeAsCalender.get(Calendar.MINUTE));
-            endDateTimeInMills = endDateTime.getTimeInMillis();
+            selectedDateTime = String.valueOf(endDate.getText()).concat(" ")
+                    .concat(String.valueOf(endTime.getText()));
+            calendar.setTime(format.parse(selectedDateTime));
+            endDateTimeInMills = calendar.getTimeInMillis();
 
-            if (!(endDateTimeInMills > startDateTimeInMills)) {
+            if (endDateTimeInMills <= startDateTimeInMills) {
                 Toast.makeText(getActivity(), "EndTime should be greater than StartTime", Toast.LENGTH_SHORT).show();
                 return false;
             }
-
         } catch (ParseException e) {
-            e.printStackTrace();
+            Log.e(Util.TAG, LOG_LABEL + e.getMessage());
             return false;
         }
         if (TextUtils.isEmpty(vehicleName.getText())) {
