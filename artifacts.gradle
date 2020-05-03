@@ -1,6 +1,4 @@
 android.applicationVariants.all { variant ->
-    def flavor = variant.mergedFlavor
-    flavor.versionCode = buildVersionCode(variant)
 
     def appName
     //Check if an applicationName property is supplied; if not use the name of the parent project.
@@ -19,7 +17,7 @@ android.applicationVariants.all { variant ->
 //        } else {
 //            newApkName = "${appName}-${variant.versionName}.${variant.versionCode}-unaligned.apk"
 //        }
-        output.outputFile = new File(output.outputFile.parent, newApkName)
+        output.outputFileName = newApkName
     }
 }
 

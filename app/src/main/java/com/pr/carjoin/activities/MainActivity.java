@@ -8,17 +8,6 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.NavigationView;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.view.GravityCompat;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -31,18 +20,19 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+
 import com.bumptech.glide.Glide;
 import com.google.android.gms.appinvite.AppInviteInvitation;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
-import com.google.android.gms.common.GooglePlayServicesRepairableException;
-import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.location.places.Place;
-import com.google.android.gms.location.places.Places;
-import com.google.android.gms.location.places.ui.PlacePicker;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -52,6 +42,11 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.widget.Autocomplete;
+import com.google.android.libraries.places.widget.model.AutocompleteActivityMode;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
@@ -68,13 +63,13 @@ import com.pr.carjoin.pojos.Vehicle;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback,
-        GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks,
         LocationListener, GoogleMap.OnMarkerClickListener, GoogleMap.OnInfoWindowClickListener,
         CreateTripDialogFragment.OnButtonClickListener {
     private static final String LOG_LABEL = "activities.MainActivity";
@@ -90,20 +85,16 @@ public class MainActivity extends AppCompatActivity
     private FirebaseUser firebaseUser;
     private GoogleMap mMap;
     private LocationRequest locationRequest;
-    private GoogleApiClient mGoogleApiClient;
     private Geocoder geocoder;
     private Marker pickUpLocationMarker;
     private TextView pickLocationAddressView, pickLocationHeading, destinationAddressView;
     private LinearLayout destinationLayout;
     private Button createTripButton, findTripButton;
-    private View.OnClickListener clickListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View view) {
-            if (view.getId() == R.id.location_pick_up_address_layout) {
-                launchPlacePicker(PICK_UP_PLACE_PICKER_REQUEST_CODE);
-            } else if (view.getId() == R.id.location_destination_address_layout) {
-                launchPlacePicker(DESTINATION_PLACE_PICKER_REQUEST_CODE);
-            }
+    private View.OnClickListener clickListener = view -> {
+        if (view.getId() == R.id.location_pick_up_address_layout) {
+            launchPlacePicker(PICK_UP_PLACE_PICKER_REQUEST_CODE);
+        } else if (view.getId() == R.id.location_destination_address_layout) {
+            launchPlacePicker(DESTINATION_PLACE_PICKER_REQUEST_CODE);
         }
     };
     private LatLng pickUpLatLng, destLatLng;
@@ -117,37 +108,29 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        buildGoogleApiClient();
         createLocationRequest();
-        mGoogleApiClient.connect();
         FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
         firebaseUser = firebaseAuth.getCurrentUser();
 
         setContentView(R.layout.activity_main);
-        pickLocationHeading = (TextView) findViewById(R.id.location_pick_up_heading);
-        LinearLayout pickUpLocationLayout = (LinearLayout) findViewById(R.id.location_pick_up_address_layout);
+        pickLocationHeading = findViewById(R.id.location_pick_up_heading);
+        LinearLayout pickUpLocationLayout = findViewById(R.id.location_pick_up_address_layout);
         pickUpLocationLayout.setOnClickListener(clickListener);
-        createTripButton = (Button) findViewById(R.id.create_trip);
-        createTripButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (validSourceDestination()) {
-                    showCreateTripDialog();
-                }
+        createTripButton = findViewById(R.id.create_trip);
+        createTripButton.setOnClickListener(v -> {
+            if (validSourceDestination()) {
+                showCreateTripDialog();
             }
         });
-        findTripButton = (Button) findViewById(R.id.find_trip);
-        findTripButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (validSourceDestination()) {
-                    launchListTripActivity();
-                }
+        findTripButton = findViewById(R.id.find_trip);
+        findTripButton.setOnClickListener(v -> {
+            if (validSourceDestination()) {
+                launchListTripActivity();
             }
         });
-        destinationLayout = (LinearLayout) findViewById(R.id.location_destination_address_layout);
+        destinationLayout = findViewById(R.id.location_destination_address_layout);
         destinationLayout.setOnClickListener(clickListener);
-        destinationAddressView = (TextView) findViewById(R.id.location_destination_address);
+        destinationAddressView = findViewById(R.id.location_destination_address);
         destinationAddressView.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -176,15 +159,12 @@ public class MainActivity extends AppCompatActivity
                 }
             }
         });
-        FloatingActionButton myLocationFab = (FloatingActionButton) findViewById(R.id.my_location_fab);
-        myLocationFab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (pickUpLocationMarker != null && userCurrentLocation != null) {
-                    LatLng userCurrentLatLong = new LatLng(userCurrentLocation.getLatitude(), userCurrentLocation.getLongitude());
-                    pickUpLocationMarker.setPosition(userCurrentLatLong);
-                    mMap.moveCamera(CameraUpdateFactory.newLatLng(userCurrentLatLong));
-                }
+        FloatingActionButton myLocationFab = findViewById(R.id.my_location_fab);
+        myLocationFab.setOnClickListener(view -> {
+            if (pickUpLocationMarker != null && userCurrentLocation != null) {
+                LatLng userCurrentLatLong = new LatLng(userCurrentLocation.getLatitude(), userCurrentLocation.getLongitude());
+                pickUpLocationMarker.setPosition(userCurrentLatLong);
+                mMap.moveCamera(CameraUpdateFactory.newLatLng(userCurrentLatLong));
             }
         });
         pickLocationAddressView = (TextView) findViewById(R.id.location_pick_up_address);
@@ -278,26 +258,18 @@ public class MainActivity extends AppCompatActivity
         mMap.setOnMarkerClickListener(this);
         mMap.setOnInfoWindowClickListener(this);
         mMap.getUiSettings().setMyLocationButtonEnabled(false);
-        mMap.setOnCameraMoveListener(new GoogleMap.OnCameraMoveListener() {
-            @Override
-            public void onCameraMove() {
-                pickUpLocationMarker.setPosition(mMap.getCameraPosition().target);
-            }
-        });
-        mMap.setOnCameraIdleListener(new GoogleMap.OnCameraIdleListener() {
-            @Override
-            public void onCameraIdle() {
-                try {
-                    List<Address> addressList = geocoder.getFromLocation(mMap.getCameraPosition().target.latitude,
-                            mMap.getCameraPosition().target.longitude, 1);
-                    if (!addressList.isEmpty()) {
-                        Log.i(Util.TAG, LOG_LABEL + " Address of the location :: " + addressList.get(0));
-                        pickUpLatLng = mMap.getCameraPosition().target;
-                        pickLocationAddressView.setText(Util.getAddressAsString(addressList.get(0)));
-                    }
-                } catch (IOException e) {
-                    Log.e(Util.TAG, LOG_LABEL + e.getMessage());
+        mMap.setOnCameraMoveListener(() -> pickUpLocationMarker.setPosition(mMap.getCameraPosition().target));
+        mMap.setOnCameraIdleListener(() -> {
+            try {
+                List<Address> addressList = geocoder.getFromLocation(mMap.getCameraPosition().target.latitude,
+                        mMap.getCameraPosition().target.longitude, 1);
+                if (!addressList.isEmpty()) {
+                    Log.i(Util.TAG, LOG_LABEL + " Address of the location :: " + addressList.get(0));
+                    pickUpLatLng = mMap.getCameraPosition().target;
+                    pickLocationAddressView.setText(Util.getAddressAsString(addressList.get(0)));
                 }
+            } catch (IOException e) {
+                Log.e(Util.TAG, LOG_LABEL + e.getMessage());
             }
         });
         enableMyLocation();
@@ -305,13 +277,13 @@ public class MainActivity extends AppCompatActivity
 
     private void setNavHeader(View headerView) {
         if (isSignedIn()) {
-            ImageView imageView = (ImageView) headerView.findViewById(R.id.nav_header_imageView);
+            ImageView imageView = headerView.findViewById(R.id.nav_header_imageView);
             Glide.with(this).load(firebaseUser.getPhotoUrl()).into(imageView);
 
-            TextView userNameView = (TextView) headerView.findViewById(R.id.nav_header_title);
+            TextView userNameView = headerView.findViewById(R.id.nav_header_title);
             userNameView.setText(firebaseUser.getDisplayName());
 
-            TextView emailView = (TextView) headerView.findViewById(R.id.nav_header_sub_title);
+            TextView emailView = headerView.findViewById(R.id.nav_header_sub_title);
             emailView.setText(firebaseUser.getEmail());
         }
     }
@@ -388,43 +360,7 @@ public class MainActivity extends AppCompatActivity
             // for ActivityCompat#requestPermissions for more details.
             return;
         }
-        Location location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-        LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient,
-                locationRequest, this);
-        if (location != null) {
-            Log.i(Util.TAG, LOG_LABEL + " current location of the device is :: " + location.toString());
-            LatLng coordinates = new LatLng(location.getLatitude(), location.getLongitude());
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(coordinates, 15));
-            pickUpLocationMarker.setPosition(coordinates);
-            userCurrentLocation = location;
-        }
-    }
-
-    private synchronized void buildGoogleApiClient() {
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .enableAutoManage(this /* FragmentActivity */,
-                        this /* OnConnectionFailedListener */)
-                .addConnectionCallbacks(this)
-                .addApi(LocationServices.API)
-                .addApi(Places.GEO_DATA_API)
-                .addApi(Places.PLACE_DETECTION_API)
-                .build();
-    }
-
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        Log.i(Util.TAG, LOG_LABEL + " connection to google API is failed");
-    }
-
-    @Override
-    public void onConnected(@Nullable Bundle bundle) {
-        Log.i(Util.TAG, LOG_LABEL + " connected to google API");
-        getLocation();
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-        Log.i(Util.TAG, LOG_LABEL + " connection to google API is suspended");
+        mMap.setMyLocationEnabled(true);
     }
 
     @Override
@@ -471,12 +407,13 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void launchPlacePicker(int requestCode) {
-        PlacePicker.IntentBuilder builder = new PlacePicker.IntentBuilder();
-        try {
-            startActivityForResult(builder.build(this), requestCode);
-        } catch (GooglePlayServicesRepairableException | GooglePlayServicesNotAvailableException e) {
-            Log.e(Util.TAG, LOG_LABEL + e.getMessage());
-        }
+        // Set the fields to specify which types of place data to
+        // return after the user has made a selection.
+        List<Place.Field> fields = Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG);
+
+        // Start the autocomplete intent.
+        Intent intent = new Autocomplete.IntentBuilder(AutocompleteActivityMode.FULLSCREEN, fields).build(this);
+        startActivityForResult(intent, requestCode);
     }
 
     @Override
@@ -495,9 +432,10 @@ public class MainActivity extends AppCompatActivity
                 break;
             case PICK_UP_PLACE_PICKER_REQUEST_CODE:
                 if (resultCode == RESULT_OK) {
-                    Place selectedPlace = PlacePicker.getPlace(this, data);
-                    pickUpLatLng = selectedPlace.getLatLng();
-                    List<Address> addresses = getAddresses(selectedPlace);
+                    Place place = Autocomplete.getPlaceFromIntent(data);
+                    Log.i(LOG_LABEL, "Place: " + place.getName() + ", " + place.getId());
+                    pickUpLatLng = place.getLatLng();
+                    List<Address> addresses = getAddresses(place);
                     if (!addresses.isEmpty())
                         pickLocationAddressView.setText(Util.getAddressAsString(addresses.get(0)));
                     showDestinationLayout();
@@ -508,9 +446,10 @@ public class MainActivity extends AppCompatActivity
                 break;
             case DESTINATION_PLACE_PICKER_REQUEST_CODE:
                 if (resultCode == RESULT_OK) {
-                    Place selectedPlace = PlacePicker.getPlace(this, data);
-                    destLatLng = selectedPlace.getLatLng();
-                    List<Address> addresses = getAddresses(selectedPlace);
+                    Place place = Autocomplete.getPlaceFromIntent(data);
+                    Log.i(LOG_LABEL, "Place: " + place.getName() + ", " + place.getId());
+                    destLatLng = place.getLatLng();
+                    List<Address> addresses = getAddresses(place);
                     if (!addresses.isEmpty())
                         destinationAddressView.setText(Util.getAddressAsString(addresses.get(0)));
                 } else {

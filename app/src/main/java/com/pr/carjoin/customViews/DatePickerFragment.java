@@ -3,8 +3,8 @@ package com.pr.carjoin.customViews;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v4.app.DialogFragment;
+import androidx.annotation.NonNull;
+import androidx.fragment.app.DialogFragment;
 import android.widget.DatePicker;
 import android.widget.TextView;
 
