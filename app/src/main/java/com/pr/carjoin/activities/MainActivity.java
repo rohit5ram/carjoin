@@ -4,10 +4,7 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
-import android.location.Address;
-import android.location.Geocoder;
 import android.location.Location;
-import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Looper;
@@ -27,7 +24,6 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -37,7 +33,6 @@ import com.google.android.gms.appinvite.AppInviteInvitation;
 import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
-import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
@@ -74,12 +69,9 @@ import com.pr.carjoin.pojos.Trip;
 import com.pr.carjoin.pojos.TripQueue;
 import com.pr.carjoin.pojos.Vehicle;
 
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback,
@@ -99,7 +91,6 @@ public class MainActivity extends AppCompatActivity
     private FirebaseUser firebaseUser;
     private GoogleMap mMap;
     private LocationRequest locationRequest;
-    private Geocoder geocoder;
     private Marker pickUpLocationMarker;
     private TextView pickLocationAddressView, pickLocationHeading, destinationAddressView;
     private LinearLayout destinationLayout;
@@ -183,7 +174,6 @@ public class MainActivity extends AppCompatActivity
             }
         });
         pickLocationAddressView = findViewById(R.id.location_pick_up_address);
-        geocoder = new Geocoder(this, Locale.getDefault());
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         toolbar.setTitle("");
@@ -221,14 +211,6 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
-    private void sendInvitation() {
-        Intent intent = new AppInviteInvitation.IntentBuilder(getString(R.string.invitation_title))
-                .setMessage(getString(R.string.invitation_message))
-                .setCallToActionText(getString(R.string.invitation_cta))
-                .build();
-        startActivityForResult(intent, REQUEST_INVITE);
-    }
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
@@ -249,9 +231,7 @@ public class MainActivity extends AppCompatActivity
             Toast.makeText(this, "Coming soon...", Toast.LENGTH_LONG).show();
         } else if (id == R.id.nav_manage) {
             Toast.makeText(this, "Coming soon...", Toast.LENGTH_LONG).show();
-        } else if (id == R.id.nav_share) {
-            sendInvitation();
-        } else if (id == R.id.nav_chat) {
+        }  else if (id == R.id.nav_chat) {
             Intent intent = new Intent(MainActivity.this, ChatMainActivity.class);
             startActivity(intent);
         } else if (id == R.id.nav_your_trips) {
@@ -273,19 +253,6 @@ public class MainActivity extends AppCompatActivity
         mMap.setOnInfoWindowClickListener(this);
         mMap.getUiSettings().setMyLocationButtonEnabled(false);
         mMap.setOnCameraMoveListener(() -> pickUpLocationMarker.setPosition(mMap.getCameraPosition().target));
-        mMap.setOnCameraIdleListener(() -> {
-            try {
-                List<Address> addressList = geocoder.getFromLocation(mMap.getCameraPosition().target.latitude,
-                        mMap.getCameraPosition().target.longitude, 1);
-                if (!addressList.isEmpty()) {
-                    Log.i(Util.TAG, LOG_LABEL + " Address of the location :: " + addressList.get(0));
-                    pickUpLatLng = mMap.getCameraPosition().target;
-                    pickLocationAddressView.setText(Util.getAddressAsString(addressList.get(0)));
-                }
-            } catch (IOException e) {
-                Log.e(Util.TAG, LOG_LABEL + e.getMessage());
-            }
-        });
         enableMyLocation();
         createLocationRequest();
     }
@@ -421,7 +388,7 @@ public class MainActivity extends AppCompatActivity
     private void launchPlacePicker(int requestCode) {
         // Set the fields to specify which types of place data to
         // return after the user has made a selection.
-        List<Place.Field> fields = Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG);
+        List<Place.Field> fields = Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG, Place.Field.ADDRESS);
 
         // Start the autocomplete intent.
         Intent intent = new Autocomplete.IntentBuilder(AutocompleteActivityMode.FULLSCREEN, fields).build(this);
@@ -447,9 +414,7 @@ public class MainActivity extends AppCompatActivity
                     Place place = Autocomplete.getPlaceFromIntent(data);
                     Log.i(LOG_LABEL, "Place: " + place.getName() + ", " + place.getId());
                     pickUpLatLng = place.getLatLng();
-                    List<Address> addresses = getAddresses(place);
-                    if (!addresses.isEmpty())
-                        pickLocationAddressView.setText(Util.getAddressAsString(addresses.get(0)));
+                    pickLocationAddressView.setText(place.getAddress());
                     showDestinationLayout();
                 } else {
                     // Sending failed or it was canceled, show failure message to the user
@@ -461,9 +426,7 @@ public class MainActivity extends AppCompatActivity
                     Place place = Autocomplete.getPlaceFromIntent(data);
                     Log.i(LOG_LABEL, "Place: " + place.getName() + ", " + place.getId());
                     destLatLng = place.getLatLng();
-                    List<Address> addresses = getAddresses(place);
-                    if (!addresses.isEmpty())
-                        destinationAddressView.setText(Util.getAddressAsString(addresses.get(0)));
+                    destinationAddressView.setText(place.getAddress());
                 } else {
                     // Sending failed or it was canceled, show failure message to the user
                     Log.d(Util.TAG, "Failed to determine destination location");
@@ -559,17 +522,6 @@ public class MainActivity extends AppCompatActivity
     private void launchListTripActivity() {
         Intent intent = new Intent(this, ListTripActivity.class);
         startActivity(intent);
-    }
-
-    public List<Address> getAddresses(Place selectedPlace) {
-        List<Address> addresses = new ArrayList<>();
-        try {
-            addresses = geocoder.getFromLocation(selectedPlace.getLatLng().latitude,
-                    selectedPlace.getLatLng().longitude, 1);
-        } catch (NullPointerException | IOException e) {
-            Log.e(Util.TAG, LOG_LABEL + e.getMessage());
-        }
-        return addresses;
     }
 
     @Override

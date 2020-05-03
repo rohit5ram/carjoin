@@ -22,10 +22,6 @@
                 android:id="@+id/nav_chat"
                 android:icon="@drawable/ic_menu_send"
                 android:title="Chat" />
-            <item
-                android:id="@+id/nav_share"
-                android:icon="@drawable/ic_menu_share"
-                android:title="Share" />
 
         </menu>
     </item>
