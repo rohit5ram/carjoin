@@ -2,12 +2,15 @@ package com.pr.carjoin.activities;
 
 import android.Manifest;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
+import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Looper;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -31,8 +34,16 @@ import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.bumptech.glide.Glide;
 import com.google.android.gms.appinvite.AppInviteInvitation;
+import com.google.android.gms.common.api.ResolvableApiException;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.LocationSettingsResponse;
+import com.google.android.gms.location.SettingsClient;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -41,6 +52,8 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.widget.Autocomplete;
@@ -70,8 +83,8 @@ import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback,
-        LocationListener, GoogleMap.OnMarkerClickListener, GoogleMap.OnInfoWindowClickListener,
-        CreateTripDialogFragment.OnButtonClickListener {
+        GoogleMap.OnMarkerClickListener, GoogleMap.OnInfoWindowClickListener,
+        CreateTripDialogFragment.OnButtonClickListener, OnFailureListener, OnSuccessListener{
     private static final String LOG_LABEL = "activities.MainActivity";
     /**
      * TripQueue code for location permission request.
@@ -82,6 +95,7 @@ public class MainActivity extends AppCompatActivity
     private static final int REQUEST_INVITE = 2;
     private static final int PICK_UP_PLACE_PICKER_REQUEST_CODE = 3;
     private static final int DESTINATION_PLACE_PICKER_REQUEST_CODE = 4;
+    private static final int REQUEST_CHECK_SETTINGS = 5;
     private FirebaseUser firebaseUser;
     private GoogleMap mMap;
     private LocationRequest locationRequest;
@@ -104,11 +118,12 @@ public class MainActivity extends AppCompatActivity
      * {@link #onRequestPermissionsResult(int, String[], int[])}.
      */
     private boolean mPermissionDenied = false;
+    private FusedLocationProviderClient fusedLocationClient;
+    private LocationCallback locationCallback;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        createLocationRequest();
         FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
         firebaseUser = firebaseAuth.getCurrentUser();
 
@@ -167,32 +182,31 @@ public class MainActivity extends AppCompatActivity
                 mMap.moveCamera(CameraUpdateFactory.newLatLng(userCurrentLatLong));
             }
         });
-        pickLocationAddressView = (TextView) findViewById(R.id.location_pick_up_address);
+        pickLocationAddressView = findViewById(R.id.location_pick_up_address);
         geocoder = new Geocoder(this, Locale.getDefault());
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         toolbar.setTitle("");
         setSupportActionBar(toolbar);
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.setDrawerListener(toggle);
         toggle.syncState();
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
         setNavHeader(navigationView.getHeaderView(0));
 
-        SupportMapFragment mapFragment =
-                (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
     }
 
     @Override
     public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
@@ -273,6 +287,7 @@ public class MainActivity extends AppCompatActivity
             }
         });
         enableMyLocation();
+        createLocationRequest();
     }
 
     private void setNavHeader(View headerView) {
@@ -308,8 +323,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (requestCode != LOCATION_PERMISSION_REQUEST_CODE) {
             return;
         }
@@ -338,39 +352,35 @@ public class MainActivity extends AppCompatActivity
      * Displays a dialog with error message explaining that the location permission is missing.
      */
     private void showMissingPermissionError() {
-        PermissionUtils.PermissionDeniedDialog
-                .newInstance(true).show(getSupportFragmentManager(), "dialog");
+        PermissionUtils.PermissionDeniedDialog.newInstance(true).show(getSupportFragmentManager(), "dialog");
     }
 
     private void createLocationRequest() {
-        locationRequest = new LocationRequest();
-        locationRequest.setInterval(6000000);
+        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder();
+
+        locationRequest = LocationRequest.create();
+        locationRequest.setInterval(600000);
         locationRequest.setFastestInterval(300000);
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-    }
 
-    private void getLocation() {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return;
-        }
-        mMap.setMyLocationEnabled(true);
+        builder.addLocationRequest(locationRequest);
+        SettingsClient client = LocationServices.getSettingsClient(this);
+        Task<LocationSettingsResponse> task = client.checkLocationSettings(builder.build());
+
+        task.addOnSuccessListener(this, this);
+        task.addOnFailureListener(this, this);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        startLocationUpdates();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
+        stopLocationUpdates();
     }
 
     @Override
@@ -384,10 +394,12 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    @Override
-    public void onLocationChanged(Location location) {
+    private void onLocationChanged(Location location) {
         Log.i(Util.TAG, LOG_LABEL + " location of the device is changed");
         userCurrentLocation = location;
+
+        float zoomLevel = 16.0f; //This goes up to 21
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), zoomLevel));
     }
 
     @Override
@@ -558,5 +570,50 @@ public class MainActivity extends AppCompatActivity
             Log.e(Util.TAG, LOG_LABEL + e.getMessage());
         }
         return addresses;
+    }
+
+    @Override
+    public void onFailure(@NonNull Exception e) {
+        if (e instanceof ResolvableApiException) {
+            // Location settings are not satisfied, but this can be fixed
+            // by showing the user a dialog.
+            try {
+                // Show the dialog by calling startResolutionForResult(),
+                // and check the result in onActivityResult().
+                ResolvableApiException resolvable = (ResolvableApiException) e;
+                resolvable.startResolutionForResult(MainActivity.this, REQUEST_CHECK_SETTINGS);
+            } catch (IntentSender.SendIntentException sendEx) {
+                // Ignore the error.
+            }
+        }
+    }
+
+    @Override
+    public void onSuccess(Object o) {
+        initLocationData();
+        startLocationUpdates();
+    }
+
+    private void initLocationData() {
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        locationCallback = new LocationCallback() {
+            @Override
+            public void onLocationResult(LocationResult locationResult) {
+                super.onLocationResult(locationResult);
+                onLocationChanged(locationResult.getLastLocation());
+            }
+        };
+    }
+
+    private void startLocationUpdates() {
+        if(fusedLocationClient != null && locationCallback != null){
+            fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.myLooper());
+        }
+    }
+
+    private void stopLocationUpdates(){
+        if(fusedLocationClient != null && locationCallback != null){
+            fusedLocationClient.removeLocationUpdates(locationCallback);
+        }
     }
 }
