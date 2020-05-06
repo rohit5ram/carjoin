@@ -134,7 +134,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             // The ApiException status code indicates the detailed failure reason.
             // Please refer to the GoogleSignInStatusCodes class reference for more information.
             Toast.makeText(LoginActivity.this, "Authentication failed.", Toast.LENGTH_SHORT).show();
-            Log.w(LOG_LABEL, "signInResult:failed code=" + e.getStatusCode());
+            Log.w(LOG_LABEL, "signInResult:failed code=" + e.getLocalizedMessage());
         }
     }
 
@@ -146,32 +146,29 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
         AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
         mAuth.signInWithCredential(credential)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        Log.d(Util.TAG, "signInWithCredential:onComplete:" + task.isSuccessful());
+                .addOnCompleteListener(this, task -> {
+                    Log.d(Util.TAG, "signInWithCredential:onComplete:" + task.isSuccessful());
 
-                        // If sign in fails, display a message to the user. If sign in succeeds
-                        // the auth state listener will be notified and logic to handle the
-                        // signed in user can be handled in the listener.
-                        if (!task.isSuccessful()) {
-                            Log.w(Util.TAG, "signInWithCredential", task.getException());
-                            Toast.makeText(LoginActivity.this, " Authentication failed for firebase.",
-                                    Toast.LENGTH_SHORT).show();
-                        } else {
-                            DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference(Util.USERS);
-                            FirebaseUser firebaseUser = task.getResult().getUser();
-                            User user = new User();
-                            user.name = firebaseUser.getDisplayName();
-                            user.email = firebaseUser.getEmail();
-                            user.photoUrl = String.valueOf(firebaseUser.getPhotoUrl());
-                            user.fcmRegistrationToken = FirebaseInstanceId.getInstance().getToken();
-                            databaseReference.child(firebaseUser.getUid()).setValue(user);
-                        }
-                        // [START_EXCLUDE]
-                        hideProgressDialog();
-                        // [END_EXCLUDE]
+                    // If sign in fails, display a message to the user. If sign in succeeds
+                    // the auth state listener will be notified and logic to handle the
+                    // signed in user can be handled in the listener.
+                    if (!task.isSuccessful()) {
+                        Log.w(Util.TAG, "signInWithCredential", task.getException());
+                        Toast.makeText(LoginActivity.this, " Authentication failed for firebase.",
+                                Toast.LENGTH_SHORT).show();
+                    } else {
+                        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference(Util.USERS);
+                        FirebaseUser firebaseUser = task.getResult().getUser();
+                        User user = new User();
+                        user.name = firebaseUser.getDisplayName();
+                        user.email = firebaseUser.getEmail();
+                        user.photoUrl = String.valueOf(firebaseUser.getPhotoUrl());
+                        user.fcmRegistrationToken = FirebaseInstanceId.getInstance().getToken();
+                        databaseReference.child(firebaseUser.getUid()).setValue(user);
                     }
+                    // [START_EXCLUDE]
+                    hideProgressDialog();
+                    // [END_EXCLUDE]
                 });
     }
 

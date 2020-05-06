@@ -521,6 +521,10 @@ public class MainActivity extends AppCompatActivity
 
     private void launchListTripActivity() {
         Intent intent = new Intent(this, ListTripActivity.class);
+        intent.putExtra("pLat", pickUpLatLng.latitude);
+        intent.putExtra("pLon", pickUpLatLng.longitude);
+        intent.putExtra("dLat", destLatLng.latitude);
+        intent.putExtra("dLon", destLatLng.longitude);
         startActivity(intent);
     }
 

@@ -23,6 +23,7 @@ import com.pr.carjoin.Util;
 import com.pr.carjoin.pojos.Trip;
 import com.pr.carjoin.pojos.TripQueue;
 import com.pr.carjoin.pojos.TripQueueMap;
+import com.pr.carjoin.pojos.Trips;
 
 import java.lang.ref.WeakReference;
 import java.text.SimpleDateFormat;
@@ -40,15 +41,13 @@ import de.hdodenhof.circleimageview.CircleImageView;
 
 public class TripsRecyclerAdapter extends RecyclerView.Adapter<TripsRecyclerAdapter.ViewHolder> implements View.OnClickListener {
     private static final String LOG_LABEL = "adapters.TripsRecyclerAdapter";
-    private final HashMap<Trip, TripQueueMap> tripTripQueueMapHashMap;
-    private final ArrayList<Trip> trips;
+    private final Trips trips;
     private static final String DATE_TIME_FORMAT = "dd:MM:yy HH:mm";
     private final WeakReference<Activity> activityWeakReference;
 
-    public TripsRecyclerAdapter(Activity activity, HashMap<Trip, TripQueueMap> tripTripQueueMapHashMap) {
+    public TripsRecyclerAdapter(Activity activity, Trips trips) {
         this.activityWeakReference = new WeakReference<>(activity);
-        this.tripTripQueueMapHashMap = tripTripQueueMapHashMap;
-        this.trips = new ArrayList<>(tripTripQueueMapHashMap.keySet());
+        this.trips = trips;
     }
 
     @Override
@@ -61,7 +60,6 @@ public class TripsRecyclerAdapter extends RecyclerView.Adapter<TripsRecyclerAdap
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
         final Trip trip = trips.get(holder.getAdapterPosition());
-        TripQueueMap tripQueueMap = tripTripQueueMapHashMap.get(trip);
         final Context context = holder.getImageView().getContext();
         Glide.with(holder.getImageView().getContext()).load(trip.owner.photoURL).into(holder.getImageView());
         holder.getUserName().setText(trip.owner.name);
@@ -71,42 +69,21 @@ public class TripsRecyclerAdapter extends RecyclerView.Adapter<TripsRecyclerAdap
         holder.getEndDate().append("   : " + new SimpleDateFormat(DATE_TIME_FORMAT, Locale.getDefault())
                 .format(new Date(trip.endDateTimeMills)));
 
-        TripQueue tripQueue = checkIfUserAlreadyExistsInTripQueue(tripQueueMap);
-        if (tripQueue != null) {
-            switch (tripQueue.status) {
-                case Constants.PENDING:
-                    holder.getRequest().setText(context.getString(R.string.string_pending));
-                    break;
-                case Constants.ACCEPTED:
-                    holder.getRequest().setText(context.getString(R.string.string_accepted));
-                    break;
-                case Constants.REJECTED:
-                    holder.getRequest().setText(context.getString(R.string.string_rejected));
-                    break;
-            }
-        } else {
-            holder.getRequest().setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(final View v) {
-                    v.setOnClickListener(null);
-                    FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
-                    DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference(Util.TRIP_QUEUE)
-                            .child(trip.id).child(firebaseUser.getUid());
-                    TripQueue newTripQueue = new TripQueue();
-                    newTripQueue.name = firebaseUser.getDisplayName();
-                    newTripQueue.status = Constants.PENDING;
-                    newTripQueue.type = Constants.COMMUTER;
-                    databaseReference.setValue(newTripQueue).addOnCompleteListener(activityWeakReference.get(), new OnCompleteListener<Void>() {
-                        @Override
-                        public void onComplete(@NonNull Task<Void> task) {
-                            if (task.isSuccessful()) {
-                                ((Button) v).setText(context.getString(R.string.string_pending));
-                            }
-                        }
-                    });
+        holder.getRequest().setOnClickListener(v -> {
+            v.setOnClickListener(null);
+            FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+            DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference(Util.TRIP_QUEUE)
+                    .child(trip.id).child(firebaseUser.getUid());
+            TripQueue newTripQueue = new TripQueue();
+            newTripQueue.name = firebaseUser.getDisplayName();
+            newTripQueue.status = Constants.PENDING;
+            newTripQueue.type = Constants.COMMUTER;
+            databaseReference.setValue(newTripQueue).addOnCompleteListener(activityWeakReference.get(), task -> {
+                if (task.isSuccessful()) {
+                    ((Button) v).setText(context.getString(R.string.string_pending));
                 }
             });
-        }
+        });
     }
 
     private TripQueue checkIfUserAlreadyExistsInTripQueue(HashMap<String, TripQueue> tripQueueHashMap) {
