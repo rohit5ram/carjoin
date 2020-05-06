@@ -70,19 +70,18 @@
                 android:text="@string/string_end_date" />
         </RelativeLayout>
 
-        <LinearLayout
-            android:layout_width="match_parent"
+        <RelativeLayout
+            android:id="@+id/button_layout"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:gravity="end"
+            android:layout_gravity="end"
             android:orientation="horizontal">
 
-            <!--<Button
-                android:id="@+id/ignore_button"
-                style="@style/Widget.AppCompat.Button.Borderless"
+            <ProgressBar
+                android:id="@+id/loading"
+                android:visibility="gone"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/string_ignore"
-                android:textColor="#EF5350" />-->
+                android:layout_height="wrap_content" />
 
             <Button
                 android:id="@+id/status"
@@ -91,7 +90,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/string_request"
                 android:textColor="#66BB6A" />
-        </LinearLayout>
+        </RelativeLayout>
 
     </LinearLayout>
 </androidx.cardview.widget.CardView>

@@ -53,7 +53,7 @@ public abstract class MyTripsFragment extends Fragment {
 
     private void listTrips(Data data) {
         progressBar.setVisibility(View.GONE);
-        if (data.trips != null && data.trips.size() > 0) {
+        if (data != null && data.trips != null && data.trips.size() > 0) {
             TripHistoryRecyclerAdapter tripsAdapter = new TripHistoryRecyclerAdapter(data.trips, getTripType(), data.userId);
             tripsRV.setLayoutManager(new LinearLayoutManager(getContext()));
             tripsRV.setItemAnimator(new DefaultItemAnimator());

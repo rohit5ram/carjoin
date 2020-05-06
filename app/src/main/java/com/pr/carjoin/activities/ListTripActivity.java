@@ -3,11 +3,13 @@ package com.pr.carjoin.activities;
 import android.annotation.SuppressLint;
 import android.os.AsyncTask;
 import android.os.Bundle;
+
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
@@ -17,19 +19,16 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 import com.pr.carjoin.R;
 import com.pr.carjoin.adapters.TripsRecyclerAdapter;
 import com.pr.carjoin.pojos.Trips;
 
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.lang.ref.WeakReference;
 
 import okhttp3.HttpUrl;
 import okhttp3.MediaType;
-import okhttp3.MultipartBody;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
@@ -55,7 +54,7 @@ public class ListTripActivity extends AppCompatActivity {
         new FetchTripsAsync("findTrips", new WeakReference<>(this), new LatLng(pLat, pLon), new LatLng(dLat, dLon)).execute();
     }
 
-    static class FetchTripsAsync extends AsyncTask<Void, Void, Trips> {
+    static class FetchTripsAsync extends AsyncTask<Void, Void, Data> {
         private final String path;
         private final WeakReference<ListTripActivity> activityWeakReference;
         private final LatLng pickup;
@@ -71,7 +70,7 @@ public class ListTripActivity extends AppCompatActivity {
 
         @SuppressLint("LongLogTag")
         @Override
-        protected Trips doInBackground(Void... voids) {
+        protected Data doInBackground(Void... voids) {
             FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
             if (user == null) {
@@ -110,7 +109,10 @@ public class ListTripActivity extends AppCompatActivity {
                     try {
                         String responseString = body.string();
                         Log.i(LOG_LABEL, "RESPONSE ::" + responseString);
-                        return new Gson().fromJson(responseString, Trips.class);
+                        Trips trips = new Gson().fromJson(responseString, Trips.class);
+                        if (trips != null) {
+                            return new Data(trips, user.getUid());
+                        }
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -122,18 +124,18 @@ public class ListTripActivity extends AppCompatActivity {
         }
 
         @Override
-        protected void onPostExecute(Trips trips) {
-            super.onPostExecute(trips);
-            activityWeakReference.get().listTrips(trips);
+        protected void onPostExecute(Data data) {
+            super.onPostExecute(data);
+            activityWeakReference.get().listTrips(data);
         }
     }
 
-    private void listTrips(Trips trips) {
+    private void listTrips(Data data) {
         ProgressBar progressBar = findViewById(R.id.list_trip_layout_progressBar);
         progressBar.setVisibility(View.GONE);
-        if (trips != null && trips.size() > 0) {
+        if (data != null && data.trips != null && data.trips.size() > 0) {
             RecyclerView recyclerView = findViewById(R.id.trips_list);
-            recyclerView.setAdapter(new TripsRecyclerAdapter(this, trips));
+            recyclerView.setAdapter(new TripsRecyclerAdapter(data.trips, data.userId));
             recyclerView.setLayoutManager(new LinearLayoutManager(this));
             recyclerView.setItemAnimator(new DefaultItemAnimator());
             recyclerView.setVisibility(View.VISIBLE);
@@ -143,4 +145,13 @@ public class ListTripActivity extends AppCompatActivity {
         }
     }
 
+    private static class Data {
+        final Trips trips;
+        final String userId;
+
+        private Data(Trips trips, String userId) {
+            this.trips = trips;
+            this.userId = userId;
+        }
+    }
 }
