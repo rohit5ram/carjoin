@@ -25,4 +25,9 @@ public class PastTripsFragment extends MyTripsFragment {
         new FetchTripsAsync("pastTrips", new WeakReference<>(this)).execute();
         return view;
     }
+
+    @Override
+    int getTripType() {
+        return 0;
+    }
 }

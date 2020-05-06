@@ -63,20 +63,28 @@
                 android:textSize="24sp" />
         </RelativeLayout>
 
-        <LinearLayout
-            android:layout_width="match_parent"
+        <RelativeLayout
+            android:id="@+id/layout_button"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:gravity="end"
-            android:orientation="horizontal">
+            android:layout_gravity="end">
+
+            <ProgressBar
+                android:visibility="gone"
+                android:id="@+id/loading"
+                android:layout_gravity="center"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
 
             <Button
                 android:id="@+id/status"
+                android:layout_gravity="center"
                 style="@style/Widget.AppCompat.Button.Borderless"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/string_request"
                 android:textColor="#66BB6A" />
-        </LinearLayout>
+        </RelativeLayout>
 
     </LinearLayout>
 </androidx.cardview.widget.CardView>

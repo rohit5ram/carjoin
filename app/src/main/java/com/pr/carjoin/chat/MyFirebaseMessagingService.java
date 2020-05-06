@@ -15,6 +15,7 @@
  */
 package com.pr.carjoin.chat;
 
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -24,6 +25,8 @@ import android.net.Uri;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
+
 import android.util.Log;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -33,6 +36,7 @@ import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
+import com.google.gson.JsonObject;
 import com.pr.carjoin.Constants;
 import com.pr.carjoin.NotificationReceiver;
 import com.pr.carjoin.R;
@@ -40,12 +44,16 @@ import com.pr.carjoin.Util;
 import com.pr.carjoin.activities.MainActivity;
 import com.pr.carjoin.activities.YourTripsActivity;
 
+import org.json.JSONObject;
+
 import java.util.Map;
 
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
     private static final String TAG = "MyFMService";
     private static final String FRIENDLY_ENGAGE_TOPIC = "friendly_engage";
+    private static final String CHANNEL_ID = "CarJoinSmallChannel";
+    private static int NOTIFICATION_ID = 1;
 
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
@@ -54,12 +62,17 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         Log.d(TAG, "FCM Notification Message: " + remoteMessage.getNotification());
         Log.d(TAG, "FCM Data Message: " + remoteMessage.getData());
 
-        if (remoteMessage.getData() != null && remoteMessage.getNotification() != null &&
-                remoteMessage.getData().size() > 0) {
+        if (remoteMessage.getNotification() != null && remoteMessage.getData().size() > 0) {
+            Log.i(TAG, "NOT NULL CASE");
             showNotification(remoteMessage.getData(), remoteMessage.getNotification().getBody());
-//            sendNotification(remoteMessage.getNotification().getBody());
         } else {
-            sendNotification("");
+            JSONObject jsonObject = new JSONObject(remoteMessage.getData());
+            try {
+                Log.i(TAG, jsonObject.getString("title"));
+                sendNotification(jsonObject.getString("title"));
+            }catch (Exception e){
+                e.printStackTrace();
+            }
         }
     }
 
@@ -68,13 +81,12 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         super.onNewToken(s);
         // If you need to handle the generation of a token, initially or after a refresh this is
         // where you should do that.
-        String token = FirebaseInstanceId.getInstance().getToken();
         FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
         if (firebaseUser != null) {
             FirebaseDatabase.getInstance().getReference(Util.USERS)
-                    .child(firebaseUser.getUid()).child("fcmRegistrationToken").setValue(token);
+                    .child(firebaseUser.getUid()).child("fcmRegistrationToken").setValue(s);
         }
-        Log.d(TAG, "FCM Token: " + token);
+        Log.d(TAG, "FCM Token: " + s);
 
         // Once a token is generated, we subscribe to topic.
         FirebaseMessaging.getInstance().subscribeToTopic(FRIENDLY_ENGAGE_TOPIC);
@@ -89,18 +101,23 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                 PendingIntent.FLAG_ONE_SHOT);
 
         Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setSmallIcon(R.mipmap.ic_launcher)
                 .setContentTitle("CarJoin")
                 .setContentText(messageBody)
                 .setAutoCancel(true)
                 .setSound(defaultSoundUri)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setContentIntent(pendingIntent);
 
-        NotificationManager notificationManager =
-                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+        NotificationChannel mChannel;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            mChannel = new NotificationChannel(CHANNEL_ID, "CarJoin", NotificationManager.IMPORTANCE_HIGH);
+            notificationManager.createNotificationChannel(mChannel);
+        }
 
-        notificationManager.notify(0, notificationBuilder.build());
+        notificationManager.notify(NOTIFICATION_ID++, notificationBuilder.build());
     }
 
     private void showNotification(Map<String, String> payLoad, String messageBody) {

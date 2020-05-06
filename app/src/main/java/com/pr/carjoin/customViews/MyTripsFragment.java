@@ -51,10 +51,10 @@ public abstract class MyTripsFragment extends Fragment {
         return view;
     }
 
-    private void listTrips(Trips trips) {
+    private void listTrips(Data data) {
         progressBar.setVisibility(View.GONE);
-        if (trips != null && trips.size() > 0) {
-            TripHistoryRecyclerAdapter tripsAdapter = new TripHistoryRecyclerAdapter(trips);
+        if (data.trips != null && data.trips.size() > 0) {
+            TripHistoryRecyclerAdapter tripsAdapter = new TripHistoryRecyclerAdapter(data.trips, getTripType(), data.userId);
             tripsRV.setLayoutManager(new LinearLayoutManager(getContext()));
             tripsRV.setItemAnimator(new DefaultItemAnimator());
             tripsRV.setVisibility(View.VISIBLE);
@@ -69,7 +69,7 @@ public abstract class MyTripsFragment extends Fragment {
         super.onDestroy();
     }
 
-    static class FetchTripsAsync extends AsyncTask<Void, Void, Trips> {
+    static class FetchTripsAsync extends AsyncTask<Void, Void, Data> {
         private final String path;
         private final WeakReference<MyTripsFragment> activityWeakReference;
 
@@ -79,7 +79,7 @@ public abstract class MyTripsFragment extends Fragment {
         }
 
         @Override
-        protected Trips doInBackground(Void... voids) {
+        protected Data doInBackground(Void... voids) {
             FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
             if (user == null) {
@@ -101,7 +101,8 @@ public abstract class MyTripsFragment extends Fragment {
                     try {
                         String responseString = body.string();
                         Log.i(LOG_LABEL, "RESPONSE ::" + responseString);
-                        return new Gson().fromJson(responseString, Trips.class);
+                        Trips trips =  new Gson().fromJson(responseString, Trips.class);
+                        return new Data(trips, user.getUid());
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -113,9 +114,21 @@ public abstract class MyTripsFragment extends Fragment {
         }
 
         @Override
-        protected void onPostExecute(Trips trips) {
-            super.onPostExecute(trips);
-            activityWeakReference.get().listTrips(trips);
+        protected void onPostExecute(Data data) {
+            super.onPostExecute(data);
+            activityWeakReference.get().listTrips(data);
         }
     }
+
+    private static class Data {
+        final Trips trips;
+        final String userId;
+
+        private Data(Trips trips, String userId) {
+            this.trips = trips;
+            this.userId = userId;
+        }
+    }
+
+    abstract int getTripType();
 }

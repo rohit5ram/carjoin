@@ -1,6 +1,8 @@
 package com.pr.carjoin.pojos;
 
-import java.util.ArrayList;
+import com.google.gson.annotations.SerializedName;
+
+import java.util.Map;
 
 /**
  * Created by vishnu on 28/3/17.
@@ -9,6 +11,7 @@ import java.util.ArrayList;
 public class Trip {
     private static final String LOG_LABEL = "pojos.Trip";
 
+    @SerializedName("tripId")
     public String id;
     public long beginDateTimeMills;
     public String destAddress;
@@ -26,7 +29,7 @@ public class Trip {
     public String vehicleRegId;
     public Owner owner;
     public String status;
-    public ArrayList<String> members;
+    public Map<String, String> members;
 
     public static class Owner {
         public String id;

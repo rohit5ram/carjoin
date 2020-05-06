@@ -86,16 +86,6 @@ public class TripsRecyclerAdapter extends RecyclerView.Adapter<TripsRecyclerAdap
         });
     }
 
-    private TripQueue checkIfUserAlreadyExistsInTripQueue(HashMap<String, TripQueue> tripQueueHashMap) {
-        if (tripQueueHashMap != null && tripQueueHashMap.size() > 0) {
-            String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-            if (tripQueueHashMap.keySet().contains(userId)) {
-                return tripQueueHashMap.get(userId);
-            }
-        }
-        return null;
-    }
-
     @Override
     public int getItemCount() {
         return trips.size();
@@ -106,7 +96,7 @@ public class TripsRecyclerAdapter extends RecyclerView.Adapter<TripsRecyclerAdap
 
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
+    static class ViewHolder extends RecyclerView.ViewHolder {
 
         private CircleImageView imageView;
         private Button request;
