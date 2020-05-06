@@ -155,7 +155,7 @@ public class MainActivity extends AppCompatActivity
                     // should remove the vishnu@yantranet.com
                     if (isSignedIn() && firebaseUser.getEmail() != null) {
                         if (firebaseUser.getEmail().equals("rohit5ram@gmail.com")
-                                || firebaseUser.getEmail().equals("vishnu@yantranet.com"))
+                                || firebaseUser.getEmail().equals("vishnu.ganta22@gmail.com"))
                             createTripButton.setVisibility(View.VISIBLE);
                         else findTripButton.setVisibility(View.VISIBLE);
                     }

@@ -46,7 +46,7 @@ public class TripsRecyclerAdapter extends RecyclerView.Adapter<TripsRecyclerAdap
     private final WeakReference<Activity> activityWeakReference;
 
     public TripsRecyclerAdapter(Activity activity, HashMap<Trip, TripQueueMap> tripTripQueueMapHashMap) {
-        this.activityWeakReference = new WeakReference<Activity>(activity);
+        this.activityWeakReference = new WeakReference<>(activity);
         this.tripTripQueueMapHashMap = tripTripQueueMapHashMap;
         this.trips = new ArrayList<>(tripTripQueueMapHashMap.keySet());
     }
