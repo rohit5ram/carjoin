@@ -30,6 +30,9 @@ import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.bumptech.glide.Glide;
 import com.google.android.gms.appinvite.AppInviteInvitation;
+import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
@@ -72,6 +75,8 @@ import com.pr.carjoin.pojos.Vehicle;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+
+import static com.pr.carjoin.chat.ChatMainActivity.ANONYMOUS;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback,
@@ -237,9 +242,19 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.nav_your_trips) {
             Intent intent = new Intent(MainActivity.this, YourTripsActivity.class);
             startActivity(intent);
+        } else if(id == R.id.sign_out) {
+            GoogleSignIn.getClient(this, new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                    .requestIdToken(getString(R.string.default_web_client_id))
+                    .requestEmail()
+                    .build()).signOut().addOnCompleteListener(task -> {
+                        FirebaseAuth.getInstance().signOut();
+                        startActivity(new Intent(this, LoginActivity.class));
+                        finish();
+                    });
+            return true;
         }
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }

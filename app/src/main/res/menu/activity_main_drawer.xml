@@ -22,6 +22,10 @@
                 android:id="@+id/nav_chat"
                 android:icon="@drawable/ic_menu_send"
                 android:title="Chat" />
+            <item
+                android:id="@+id/sign_out"
+                android:icon="@drawable/ic_menu_send"
+                android:title="Sign Out" />
 
         </menu>
     </item>
