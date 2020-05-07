@@ -79,6 +79,7 @@ dependencies {
     implementation 'com.squareup.okhttp3:okhttp:4.2.2'
 
     implementation 'com.google.guava:guava:24.1-jre'
+    implementation 'com.paypal.sdk:paypal-android-sdk:2.15.3'
 }
 apply plugin: 'com.google.gms.google-services'
 apply from: "../artifacts.gradle"

@@ -233,7 +233,15 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_payment) {
-            Toast.makeText(this, "Coming soon...", Toast.LENGTH_LONG).show();
+            FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+            if (firebaseUser != null && firebaseUser.getEmail() != null) {
+                if (firebaseUser.getEmail().equals("rohit5ram@gmail.com") || firebaseUser.getEmail().equals("vishnu.ganta22@gmail.com")){
+                    Toast.makeText(this, "Driver's Can't Pay...", Toast.LENGTH_LONG).show();
+                }else{
+                    Intent intent = new Intent(MainActivity.this, PayPalActivity.class);
+                    startActivity(intent);
+                }
+            }
         } else if (id == R.id.nav_manage) {
             Toast.makeText(this, "Coming soon...", Toast.LENGTH_LONG).show();
         }  else if (id == R.id.nav_chat) {
