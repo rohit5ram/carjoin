@@ -54,6 +54,7 @@
     <string name="string_rejected">Rejected</string>
     <string name="string_accepted">Accepted</string>
     <string name="string_start_date">Start Date</string>
+    <string name="string_no_of_passengers">No. Of Passengers</string>
     <string name="string_end_date">End Date</string>
     <string name="string_source">Source</string>
     <string name="string_destination">Destination</string>

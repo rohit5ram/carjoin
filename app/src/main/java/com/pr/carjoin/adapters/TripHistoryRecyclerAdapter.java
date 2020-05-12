@@ -64,6 +64,10 @@ public class TripHistoryRecyclerAdapter extends RecyclerView.Adapter<TripHistory
         holder.getEndDate().append("   : " + new SimpleDateFormat(DATE_TIME_FORMAT, Locale.getDefault())
                 .format(new Date(trip.endDateTimeMills)));
 
+        if(trip.members != null){
+            holder.getNoOfPassengers().append("  :  " + trip.members.size());
+        }
+
 
         holder.getStatus().setOnClickListener(v -> {
             holder.getProgressBar().setVisibility(View.VISIBLE);
@@ -127,7 +131,7 @@ public class TripHistoryRecyclerAdapter extends RecyclerView.Adapter<TripHistory
     public static class ViewHolder extends RecyclerView.ViewHolder {
 
         private Button status;
-        private TextView source, startDate, endDate, destination;
+        private TextView source, startDate, endDate, destination, noOfPassengers;
         private ProgressBar progressBar;
         private RelativeLayout layout;
 
@@ -169,6 +173,10 @@ public class TripHistoryRecyclerAdapter extends RecyclerView.Adapter<TripHistory
 
         public RelativeLayout getLayout() {
             return layout;
+        }
+
+        public TextView getNoOfPassengers() {
+            return noOfPassengers;
         }
     }
 
