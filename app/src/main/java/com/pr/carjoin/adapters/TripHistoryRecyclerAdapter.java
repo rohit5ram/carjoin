@@ -66,6 +66,8 @@ public class TripHistoryRecyclerAdapter extends RecyclerView.Adapter<TripHistory
 
         if(trip.members != null){
             holder.getNoOfPassengers().append("  :  " + trip.members.size());
+        }else{
+            holder.getNoOfPassengers().append("  :  " + 0);
         }
 
 
@@ -145,6 +147,7 @@ public class TripHistoryRecyclerAdapter extends RecyclerView.Adapter<TripHistory
             destination = itemView.findViewById(R.id.destination_address);
             progressBar = itemView.findViewById(R.id.loading);
             layout = itemView.findViewById(R.id.layout_button);
+            noOfPassengers = itemView.findViewById(R.id.no_of_people);
         }
 
         public Button getStatus() {

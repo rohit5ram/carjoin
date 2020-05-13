@@ -81,7 +81,7 @@ import static com.pr.carjoin.chat.ChatMainActivity.ANONYMOUS;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback,
         GoogleMap.OnMarkerClickListener, GoogleMap.OnInfoWindowClickListener,
-        CreateTripDialogFragment.OnButtonClickListener, OnFailureListener, OnSuccessListener{
+        CreateTripDialogFragment.OnButtonClickListener, OnFailureListener, OnSuccessListener {
     private static final String LOG_LABEL = "activities.MainActivity";
     /**
      * TripQueue code for location permission request.
@@ -158,9 +158,8 @@ public class MainActivity extends AppCompatActivity
                 if (editable.length() > 0) {
                     FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
                     // should remove the vishnu@yantranet.com
-                    if (isSignedIn() && firebaseUser.getEmail() != null) {
-                        if (firebaseUser.getEmail().equals("rohit5ram@gmail.com")
-                                || firebaseUser.getEmail().equals("vishnu.ganta22@gmail.com"))
+                    if (isSignedIn()) {
+                        if (Util.isDriver(firebaseUser))
                             createTripButton.setVisibility(View.VISIBLE);
                         else findTripButton.setVisibility(View.VISIBLE);
                     }
@@ -234,31 +233,29 @@ public class MainActivity extends AppCompatActivity
 
         if (id == R.id.nav_payment) {
             FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
-            if (firebaseUser != null && firebaseUser.getEmail() != null) {
-                if (firebaseUser.getEmail().equals("rohit5ram@gmail.com") || firebaseUser.getEmail().equals("vishnu.ganta22@gmail.com")){
-                    Toast.makeText(this, "Driver's Can't Pay...", Toast.LENGTH_LONG).show();
-                }else{
-                    Intent intent = new Intent(MainActivity.this, PayPalActivity.class);
-                    startActivity(intent);
-                }
+            if (Util.isDriver(firebaseUser)) {
+                Toast.makeText(this, "Driver's Can't Pay...", Toast.LENGTH_LONG).show();
+            } else {
+                Intent intent = new Intent(MainActivity.this, PayPalActivity.class);
+                startActivity(intent);
             }
         } else if (id == R.id.nav_manage) {
             Toast.makeText(this, "Coming soon...", Toast.LENGTH_LONG).show();
-        }  else if (id == R.id.nav_chat) {
+        } else if (id == R.id.nav_chat) {
             Intent intent = new Intent(MainActivity.this, ChatMainActivity.class);
             startActivity(intent);
         } else if (id == R.id.nav_your_trips) {
             Intent intent = new Intent(MainActivity.this, YourTripsActivity.class);
             startActivity(intent);
-        } else if(id == R.id.sign_out) {
+        } else if (id == R.id.sign_out) {
             GoogleSignIn.getClient(this, new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                     .requestIdToken(getString(R.string.default_web_client_id))
                     .requestEmail()
                     .build()).signOut().addOnCompleteListener(task -> {
-                        FirebaseAuth.getInstance().signOut();
-                        startActivity(new Intent(this, LoginActivity.class));
-                        finish();
-                    });
+                FirebaseAuth.getInstance().signOut();
+                startActivity(new Intent(this, LoginActivity.class));
+                finish();
+            });
             return true;
         }
 
@@ -585,13 +582,13 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void startLocationUpdates() {
-        if(fusedLocationClient != null && locationCallback != null){
+        if (fusedLocationClient != null && locationCallback != null) {
             fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.myLooper());
         }
     }
 
-    private void stopLocationUpdates(){
-        if(fusedLocationClient != null && locationCallback != null){
+    private void stopLocationUpdates() {
+        if (fusedLocationClient != null && locationCallback != null) {
             fusedLocationClient.removeLocationUpdates(locationCallback);
         }
     }

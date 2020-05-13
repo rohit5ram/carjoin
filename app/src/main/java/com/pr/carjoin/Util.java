@@ -3,6 +3,8 @@ package com.pr.carjoin;
 import android.location.Address;
 import android.util.Log;
 
+import com.google.firebase.auth.FirebaseUser;
+
 /**
  * Created by rohit on 31/5/15.
  */
@@ -48,5 +50,12 @@ public class Util {
         } else {
             return strings[0] + "," + strings[strings.length - 1];
         }
+    }
+
+    public static boolean isDriver(FirebaseUser user) {
+        if (user != null && user.getEmail() != null) {
+            return user.getEmail().equals("vishnu.ganta22@gmail.com");
+        }
+        return false;
     }
 }
