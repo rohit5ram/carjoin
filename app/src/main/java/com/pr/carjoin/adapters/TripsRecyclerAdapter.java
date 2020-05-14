@@ -46,11 +46,13 @@ public class TripsRecyclerAdapter extends RecyclerView.Adapter<TripsRecyclerAdap
     private static final String LOG_LABEL = "adapters.TripsRecyclerAdapter";
     private final Trips trips;
     private final String userId;
+    private final String email;
     private static final String DATE_TIME_FORMAT = "dd:MM:yy HH:mm";
 
-    public TripsRecyclerAdapter(Trips trips, String userId) {
+    public TripsRecyclerAdapter(Trips trips, String userId, String email) {
         this.trips = trips;
         this.userId = userId;
+        this.email = email;
     }
 
     @Override
@@ -74,7 +76,7 @@ public class TripsRecyclerAdapter extends RecyclerView.Adapter<TripsRecyclerAdap
         holder.getRequest().setOnClickListener(v -> {
             holder.progressBar.setVisibility(View.VISIBLE);
             holder.getRequest().setVisibility(View.GONE);
-            new UpdateTrip("requestTrip", trip.id, userId, new WeakReference<>(TripsRecyclerAdapter.this), new WeakReference<>(holder)).execute();
+            new UpdateTrip("requestTrip", trip.id, userId, email, new WeakReference<>(TripsRecyclerAdapter.this), new WeakReference<>(holder)).execute();
         });
     }
 
@@ -142,13 +144,15 @@ public class TripsRecyclerAdapter extends RecyclerView.Adapter<TripsRecyclerAdap
         private final String path;
         private final String tripId;
         private final String userId;
+        private final String email;
         private final WeakReference<TripsRecyclerAdapter> recyclerAdapterWeakReference;
         private final WeakReference<ViewHolder> viewHolderWeakReference;
 
-        UpdateTrip(String path, String tripId, String userId, WeakReference<TripsRecyclerAdapter> recyclerAdapterWeakReference, WeakReference<ViewHolder> viewHolderWeakReference) {
+        UpdateTrip(String path, String tripId, String userId, String email, WeakReference<TripsRecyclerAdapter> recyclerAdapterWeakReference, WeakReference<ViewHolder> viewHolderWeakReference) {
             this.path = path;
             this.tripId = tripId;
             this.userId = userId;
+            this.email = email;
             this.recyclerAdapterWeakReference = recyclerAdapterWeakReference;
             this.viewHolderWeakReference = viewHolderWeakReference;
         }
@@ -167,6 +171,7 @@ public class TripsRecyclerAdapter extends RecyclerView.Adapter<TripsRecyclerAdap
                 JSONObject jsonObject = new JSONObject();
                 jsonObject.put("userId", userId);
                 jsonObject.put("tripId", tripId);
+                jsonObject.put("email", email);
 
                 MediaType JSON = MediaType.parse("application/json; charset=utf-8");
                 RequestBody requestBody = RequestBody.create(jsonObject.toString(), JSON);

@@ -68,8 +68,9 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         } else {
             JSONObject jsonObject = new JSONObject(remoteMessage.getData());
             try {
-                Log.i(TAG, jsonObject.getString("title"));
-                sendNotification(jsonObject.getString("title"));
+                String title = jsonObject.getString("title");
+                String subTitle = jsonObject.getString("subTitle");
+                sendNotification(title, subTitle);
             }catch (Exception e){
                 e.printStackTrace();
             }
@@ -94,7 +95,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
     //This method is only generating push notification
     //It is same as we did in earlier posts
-    private void sendNotification(String messageBody) {
+    private void sendNotification(String messageBody, String title) {
         Intent intent = new Intent(this, MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent,
@@ -103,7 +104,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setSmallIcon(R.mipmap.ic_launcher)
-                .setContentTitle("CarJoin")
+                .setContentTitle(title != null && !title.equals("") ? title : "CarJoin")
                 .setContentText(messageBody)
                 .setAutoCancel(true)
                 .setSound(defaultSoundUri)

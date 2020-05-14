@@ -111,7 +111,7 @@ public class ListTripActivity extends AppCompatActivity {
                         Log.i(LOG_LABEL, "RESPONSE ::" + responseString);
                         Trips trips = new Gson().fromJson(responseString, Trips.class);
                         if (trips != null) {
-                            return new Data(trips, user.getUid());
+                            return new Data(trips, user.getUid(), user.getEmail());
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -135,7 +135,7 @@ public class ListTripActivity extends AppCompatActivity {
         progressBar.setVisibility(View.GONE);
         if (data != null && data.trips != null && data.trips.size() > 0) {
             RecyclerView recyclerView = findViewById(R.id.trips_list);
-            recyclerView.setAdapter(new TripsRecyclerAdapter(data.trips, data.userId));
+            recyclerView.setAdapter(new TripsRecyclerAdapter(data.trips, data.userId, data.email));
             recyclerView.setLayoutManager(new LinearLayoutManager(this));
             recyclerView.setItemAnimator(new DefaultItemAnimator());
             recyclerView.setVisibility(View.VISIBLE);
@@ -148,10 +148,12 @@ public class ListTripActivity extends AppCompatActivity {
     private static class Data {
         final Trips trips;
         final String userId;
+        final String email;
 
-        private Data(Trips trips, String userId) {
+        private Data(Trips trips, String userId, String email) {
             this.trips = trips;
             this.userId = userId;
+            this.email = email;
         }
     }
 }
