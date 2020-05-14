@@ -10,6 +10,7 @@ import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -197,6 +198,7 @@ public class TripsRecyclerAdapter extends RecyclerView.Adapter<TripsRecyclerAdap
 
     private void updateUI(ViewHolder viewHolder, Boolean aBoolean) {
         if(!aBoolean){
+            Toast.makeText(viewHolder.endDate.getContext(), "No seats Available", Toast.LENGTH_SHORT).show();
             viewHolder.progressBar.setVisibility(View.GONE);
             viewHolder.getRequest().setVisibility(View.VISIBLE);
         }else{
