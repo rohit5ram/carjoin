@@ -69,7 +69,10 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             JSONObject jsonObject = new JSONObject(remoteMessage.getData());
             try {
                 String title = jsonObject.getString("title");
-                String subTitle = jsonObject.getString("subTitle");
+                String subTitle = null;
+                if(jsonObject.has("subTitle")){
+                    subTitle = jsonObject.getString("subTitle");
+                }
                 sendNotification(title, subTitle);
             }catch (Exception e){
                 e.printStackTrace();
